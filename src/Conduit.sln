@@ -1,0 +1,69 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Conduit", "Conduit\Conduit.csproj", "{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Conduit.Tests", "Tests\Conduit.Tests\Conduit.Tests.csproj", "{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{669B7895-713C-43AB-9969-7EFA13FEB4C3}"
+	ProjectSection(SolutionItems) = preProject
+		Conduit.vsmdi = Conduit.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{32BEEC01-AE6E-4EF8-8610-AFBEA5173298}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Conduit.Bus.MassTransit", "Conduit.Bus.MassTransit\Conduit.Bus.MassTransit.csproj", "{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}"
+EndProject
+Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Conduit.vsmdi
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}.Release|x86.ActiveCfg = Release|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41}.Release|x86.ActiveCfg = Release|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41} = {32BEEC01-AE6E-4EF8-8610-AFBEA5173298}
+	EndGlobalSection
+EndGlobal
