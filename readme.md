@@ -25,9 +25,9 @@ is connected to the service bus and makes the service bus transparent.
 
 This is how 2 Conduits distributed built with Conduit would look separated by the service bus.
 
-ComponentA <-> |---------|     |---------|     |-------------|     |---------|     |---------| <-> ComponentC
+ComponentA <-> |=========|     |=========|     |=============|     |=========|     |=========| <-> ComponentC
                | Msg Bus | <-> | Conduit | <-> | Service Bus | <-> | Conduit | <-> | Msg Bus |
-ComponentB <-> |---------|     |---------|     |-------------|     |---------|	   |---------| <-> ComponentD
+ComponentB <-> |=========|     |=========|     |=============|     |=========|	   |=========| <-> ComponentD
 
 Conduit has a message protocol on top of the service bus to help with common needs that come from
 building a distributed service architecture. This message protocol supports service discovery and 
@@ -100,32 +100,32 @@ it is recommended you use a Uri scheme.
     }
 
 #### Create a Conduit
-[Conduit(TestConduitUri)]
-class AccountConduit : Conduit,
-    IHandle<BusOpened>,
-    IHandle<AnnounceServiceIdentity>
-{
-    public AccountConduit(IServiceBus bus)
-        : base(bus)
+    [Conduit("http://company.com/Services/AccountService")]
+    class AccountConduit : Conduit,
+        IHandle<BusOpened>,
+        IHandle<AnnounceServiceIdentity>
     {
-        // Add all your ConduitComponents here to be included in the Conduit.
-        this.Components.Add(new CustomerProfileComponent());
-        this.Components.Add(new OrderComponent());
-    }
+        public AccountConduit(IServiceBus bus)
+            : base(bus)
+        {
+            // Add all your ConduitComponents here to be included in the Conduit.
+            this.Components.Add(new CustomerProfileComponent());
+            this.Components.Add(new OrderComponent());
+        }
 
-    public void Handle(BusOpened message)
-    {
-        // The service bus has opened, lets send a query out to discover what services
-        // and capabilities exist on the distributed network.
-        Bus.Publish<FindAvailableServices>();
-    }
+        public void Handle(BusOpened message)
+        {
+            // The service bus has opened, lets send a query out to discover what services
+            // and capabilities exist on the distributed network.
+            Bus.Publish<FindAvailableServices>();
+        }
 
-    public void Handle(AnnounceServiceIdentity message)
-    {
-        // Now that we are receiving service identities with capabilities
-        // we could do something here if we wanted.
+        public void Handle(AnnounceServiceIdentity message)
+        {
+            // Now that we are receiving service identities with capabilities
+            // we could do something here if we wanted.
+        }
     }
-}
 
 #### Open the Conduit
     // This is an example using Conduit.Bus.MassTransit
