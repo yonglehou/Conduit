@@ -25,9 +25,9 @@ is connected to the service bus and makes the service bus transparent.
 
 This is how 2 Conduits distributed built with Conduit would look separated by the service bus.
 
-ComponentA <-> |=========|     |=========|     |=============|     |=========|     |=========| <-> ComponentC
+'ComponentA <-> |=========|     |=========|     |=============|     |=========|     |=========| <-> ComponentC
                | Msg Bus | <-> | Conduit | <-> | Service Bus | <-> | Conduit | <-> | Msg Bus |
-ComponentB <-> |=========|     |=========|     |=============|     |=========|	   |=========| <-> ComponentD
+ComponentB <-> |=========|     |=========|     |=============|     |=========|	   |=========| <-> ComponentD'
 
 Conduit has a message protocol on top of the service bus to help with common needs that come from
 building a distributed service architecture. This message protocol supports service discovery and 
