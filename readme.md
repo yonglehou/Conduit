@@ -5,13 +5,14 @@ Enterprise Service Bus (ESB).
 
 The design principals behind Conduit are:
 
-* An event based protocol layer on top of an Enterprise Service Bus (ESB).
 * Decoupling services should be simple.
 * Writing event driven services should be simple.
-* Supports service discovery.
+* Moving functionality from one application/service to another should be simple.
+* Support service discovery.
 * Give you a foundation for writing services that can easily scale out for capacity growth and/or resiliency.
 * Provide a default easy to use service bus and queue technology but allow any service bus and queue 
 implementation to sit underneath.
+* An event based protocol layer on top of an Enterprise Service Bus (ESB).
 
 Conduit allows you to write components which participate on a distributed network and provides the
 ability to publish and subscribe messages in the form of commands/queries/events. Since Conduit is 
