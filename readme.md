@@ -41,9 +41,9 @@ distributed subscribers.
 
 This is how 2 services distributed with Conduit look connected by the service bus.
 
-    ComponentA <-> |=========|     |=========|     |=============|     |=========|     |=========| <-> ComponentC
-                   | Msg Bus | <-> | Conduit | <-> | Service Bus | <-> | Conduit | <-> | Msg Bus |
-    ComponentB <-> |=========|     |=========|     |=============|     |=========|	   |=========| <-> ComponentD
+    Component A <-> |=========|     |===========|     |=============|     |===========|     |=========| <-> Component C
+                    | Msg Bus | <-> | Conduit A | <-> | Service Bus | <-> | Conduit B | <-> | Msg Bus |
+    Component B <-> |=========|     |===========|     |=============|     |===========|	    |=========| <-> Component D
 
 The service bus is transparent. ConduitComponents only deal with the message bus. The message bus forwards
 messages on to the service bus (unless a message is marked local only).
