@@ -82,10 +82,10 @@ It is recommended you use a Uri scheme but this is not forced.
     }
 
 #### Create a ConduitComponent
-Implementing the IHandle<T> interface is how your ConduitComponent receives messages from the local message bus
+Implementing the IHandle interface is how your ConduitComponent receives messages from the local message bus
 and the service bus.
 
-Bus.Publish<T> is used for publishing messages to the local message bus. ConduitComponents within your Conduit who
+Bus.Publish() is used for publishing messages to the local message bus. ConduitComponents within your Conduit who
 subscribe to this message will receive it first and then the Conduit will forward the message out over the service bus
 to distributed subscribers throughout the network.
 
