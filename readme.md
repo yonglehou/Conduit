@@ -20,7 +20,7 @@ ability to publish and subscribe messages in the form of commands/queries/events
 an Event Driven Architecture, components communicate through publishing and subscribing to messages.
 
 Conduit abstracts the service bus implementation and currently has 1 implementation on top of MassTransit.
-New service bus implementations are possible. Developing with Conduit you shouldn't need to talk to the
+New service bus implementations are possible. When developing with Conduit you shouldn't need to talk to the
 service bus directly.
 
 Conduit makes publishing and subscribing to messages over the distributed network simple.
