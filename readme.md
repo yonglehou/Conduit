@@ -1,7 +1,16 @@
 # Conduit
-Conduit is a framework for developing distributed EDA (Event Driven Architecture) based services 
-on top of an ESB (Enterprise Service Bus). ESB's are common in large scale systems and Conduit 
-tries to provide a framework to easily build distributed services.
+Conduit is a framework for developing distributed services. The goal of Conduit is to make decoupled
+services a breeze and does so by promoting an Event Driven Architecture (EDA).
+
+The design principals behind Conduit are:
+
+* An event based protocol layer on top of an Enterprise Service Bus (ESB).
+* Decoupling services should be simple.
+* Writing event driven services should be simple.
+* Service discovery.
+* Give you a foundation for writing services that can easily scale out for capacity growth and resiliency.
+* Provide a default easy to use service bus and queue technology but allow any service bus and queue 
+implementation to sit underneath.
 
 Conduit allows you to write components which participate on a distributed network and provides the
 ability to publish and subscribe messages in the form of commands/queries/events. Since Conduit is 
@@ -10,9 +19,6 @@ an Event Driven Architecture, components communicate through publishing and subs
 Conduit abstracts the service bus implementation and currently has 1 implementation on top of MassTransit.
 New service bus implementations are possible. Developing with Conduit you shouldn't need to talk to the
 service bus directly.
-
-EDA is the core of Conduit's design. It contains a local message bus (Event Aggregator) and the service bus
-to make this very simple for writing distributed EDA driven services.
 
 Publishing a message is a 2 stage process (under the hood automatically for you). Messages are published to 
 the local message bus and ConduitComponents who subscribe to the message within your Conduit will receive
@@ -25,9 +31,9 @@ is connected to the service bus and makes the service bus transparent.
 
 This is how 2 Conduits distributed built with Conduit would look separated by the service bus.
 
-'ComponentA <-> |=========|     |=========|     |=============|     |=========|     |=========| <-> ComponentC
-               | Msg Bus | <-> | Conduit | <-> | Service Bus | <-> | Conduit | <-> | Msg Bus |
-ComponentB <-> |=========|     |=========|     |=============|     |=========|	   |=========| <-> ComponentD'
+    ComponentA <-> |=========|     |=========|     |=============|     |=========|     |=========| <-> ComponentC
+                   | Msg Bus | <-> | Conduit | <-> | Service Bus | <-> | Conduit | <-> | Msg Bus |
+    ComponentB <-> |=========|     |=========|     |=============|     |=========|	   |=========| <-> ComponentD
 
 Conduit has a message protocol on top of the service bus to help with common needs that come from
 building a distributed service architecture. This message protocol supports service discovery and 
