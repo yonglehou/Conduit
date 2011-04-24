@@ -23,12 +23,13 @@ Conduit abstracts the service bus implementation and currently has 1 implementat
 New service bus implementations are possible. Developing with Conduit you shouldn't need to talk to the
 service bus directly.
 
-Conduit makes publishing and subscribing to messages over the distributed network simple. When a message 
-gets published, under the hood the message gets delivered to the local message bus and ConduitComponents 
-who subscribe to the message within your Conduit will receive the message. The message is then sent out the 
-service bus for distributed Conduits who subscribe to the message type. Conduit supports a flag for indicating 
-that a message should be local only. This allows you to write internal only events that will not get published 
-over the service bus.
+Conduit makes publishing and subscribing to messages over the distributed network simple.
+
+Conduit makes your applications and services resilient. Since messages are delivered to queues, if any of your 
+applications or services crash you have not lost any messages. The application or service can restart and
+consume the messages waiting in the queue. Your application requires no change to support this resiliency.
+The service bus utilizes queues and since the service bus is transparent to the ConduitComponents this resiliency
+is for free.
 
 ## Local message bus and the service bus
 
@@ -43,6 +44,9 @@ This is how 2 services distributed with Conduit look connected by the service bu
     ComponentA <-> |=========|     |=========|     |=============|     |=========|     |=========| <-> ComponentC
                    | Msg Bus | <-> | Conduit | <-> | Service Bus | <-> | Conduit | <-> | Msg Bus |
     ComponentB <-> |=========|     |=========|     |=============|     |=========|	   |=========| <-> ComponentD
+
+The service bus is transparent. ConduitComponents only deal with the message bus. The message bus forwards
+messages on to the service bus (unless a message is marked local only).
 
 Conduit has a message protocol on top of the service bus to help with common needs that come from
 building a distributed service architecture. This message protocol supports service discovery and 
