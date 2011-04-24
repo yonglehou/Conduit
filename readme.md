@@ -32,9 +32,11 @@ over the service bus.
 
 ## Local message bus and the service bus
 
-* The message bus is a bus internal to a Conduit (application or service).
+* The message bus is a bus internal to a Conduit (application or service). Messages marked as local only will 
+get published within the local message bus and not get publish to the distributed network via the service bus.
 * The service bus is the distributed network. The message bus is connected to the service bus and makes the 
-service bus transparent.
+service bus transparent. By default messages go from the message bus to the service bus and then to the 
+distributed subscribers.
 
 This is how 2 services distributed with Conduit look connected by the service bus.
 
