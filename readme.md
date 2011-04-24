@@ -103,7 +103,7 @@ subscribe to this message will receive it first and then the Conduit will forwar
 to distributed subscribers throughout the network.
 
     [ConduitComponent("http://company.com/Services/AccountService/CustomerProfileComponent")]
-    class CustomerProfileComponent : ConduitComponent, IHandle<ChangeCustomerAddress>
+    public class CustomerProfileComponent : ConduitComponent, IHandle<ChangeCustomerAddress>
     {
         public void Handle(ChangeCustomerAddress message)
         {
@@ -127,7 +127,7 @@ to distributed subscribers throughout the network.
 
 #### Create a Conduit
     [Conduit("http://company.com/Services/AccountService")]
-    class AccountConduit : Conduit,
+    public class AccountConduit : Conduit,
         IHandle<BusOpened>,
         IHandle<AnnounceServiceIdentity>
     {
