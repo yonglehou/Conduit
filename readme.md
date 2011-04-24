@@ -30,7 +30,7 @@ service bus for distributed Conduits who subscribe to the message type. Conduit 
 that a message should be local only. This allows you to write internal only events that will not get published 
 over the service bus.
 
-#### Local message bus and the service bus
+## Local message bus and the service bus
 
 * The message bus is a bus internal to a Conduit (application or service).
 * The service bus is the distributed network. The message bus is connected to the service bus and makes the 
