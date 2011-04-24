@@ -70,7 +70,7 @@ of the loose coupling. Another benefit is if you need to scale out later you can
 into new Conduits distributed throughout the network.
 
 #### Namespaces
-Conduit uses a similar system as XMPP uses with XML namespaces for identifying types and capabilities. These
+Conduit uses a similar system that XMPP uses with XML namespaces for identifying types and capabilities. These
 namespaces get applied to messages, Conduits and ConduitComponents. Namespaces are defined as a string. 
 It is recommended you use a Uri scheme but this is not forced.
 
