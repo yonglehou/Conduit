@@ -28,7 +28,7 @@ Conduit makes publishing and subscribing to messages over the distributed networ
 Conduit makes your applications and services resilient. Since messages are delivered to queues, if any of your 
 applications or services crash you have not lost any messages. The application or service can restart and
 consume the messages waiting in the queue. Your application requires no change to support this resiliency.
-The service bus utilizes queues and since the service bus is transparent to the ConduitComponents this resiliency
+The service bus utilizes queues and since the service bus is transparent to the Components this resiliency
 is for free.
 
 ## Message bus and service bus
@@ -45,15 +45,15 @@ This is how 2 services distributed with Conduit look connected by the service bu
                     | Msg Bus | <-> | Conduit A | <-> | Service Bus | <-> | Conduit B | <-> | Msg Bus |
     Component B <-> |=========|     |===========|     |=============|     |===========|	    |=========| <-> Component D
 
-The service bus is transparent. ConduitComponents only deal with the message bus. The message bus forwards
+The service bus is transparent. Components only deal with the message bus. The message bus forwards
 messages on to the service bus (unless a message is marked local only).
 
 Conduit has a message protocol on top of the service bus to help with common needs that come from
 building a distributed service architecture. This message protocol supports service discovery and 
-capability discovery. A ConduitComponent can publish a FindAvailableServices query which will
+capability discovery. A Component can publish a FindAvailableServices query which will
 propogate the service bus. Every Conduit responds to this message by default allowing for your
-ConduitComponent to detect what capabilities exist on the network. This is all automatic. By
-creating a ConduitComponent that subscribes to messages, the ConduitComponent already understands
+Component to detect what capabilities exist on the network. This is all automatic. By
+creating a Component that subscribes to messages, the Component already understands
 what to send as a response to the query.
 
 ## How to get started
@@ -61,7 +61,7 @@ Building an array of services and components is simple using Conduit. The two ke
 Conduit and a ConduitComponent.
 
 A Conduit represents your application or service. You should only have one of these in your process.
-A Conduit can contain many ConduitComponents.
+A Conduit can contain many Components.
 
 ConduitComponents makes up the functionality of your application or service. You should have many of these
 and they will likely communicate with each other. You should break your ConduitComponents based on
@@ -70,7 +70,7 @@ of the loose coupling. Another benefit is if you need to scale out later you can
 into new Conduits distributed throughout the network.
 
 #### Namespaces
-Conduit uses a similar system that XMPP uses with XML namespaces for identifying types and capabilities. These
+Conduit uses a similar system that XML uses with namespaces for identifying types and capabilities. These
 namespaces get applied to messages, Conduits and ConduitComponents. Namespaces are defined as a string. 
 It is recommended you use a Uri scheme but this is not forced.
 
@@ -94,13 +94,13 @@ It is recommended you use a Uri scheme but this is not forced.
         public string Country { get; private set; }
     }
 
-#### Create a ConduitComponent
-Implementing the IHandle interface is how your ConduitComponent receives messages from the local message bus
+#### Create a Component
+Implementing the IHandle interface is how your Component receives messages from the local message bus
 and the service bus.
 
-Bus.Publish() is used for publishing messages to the local message bus. ConduitComponents within your Conduit who
-subscribe to this message will receive it first and then the Conduit will forward the message out over the service bus
-to distributed subscribers throughout the network.
+Bus.Publish() is used for publishing messages to the local message bus. Components within your Conduit who
+subscribe to this message will receive it first and then the Conduit will forward the message out over the 
+service bus to distributed subscribers throughout the network.
 
     [ConduitComponent("http://company.com/Services/AccountService/CustomerProfileComponent")]
     public class CustomerProfileComponent : ConduitComponent, 
@@ -124,7 +124,7 @@ to distributed subscribers throughout the network.
         public void Handle(ChangeCustomerAddress message)
         {
             // This message comes from either the local message bus or the service bus.
-            // This is transparent to the ConduitComponent.
+            // This is transparent to the Component.
 
             // Example of updating the customer details.
             Customer customer = repository.GetById(message.CustomerId);
@@ -149,7 +149,7 @@ to distributed subscribers throughout the network.
         public AccountConduit(IServiceBus bus)
             : base(bus)
         {
-            // Add all your ConduitComponents here to be included in the Conduit.
+            // Add all your Components here to be included in the Conduit.
             this.Components.Add(new CustomerProfileComponent());
             this.Components.Add(new OrderComponent());
         }
