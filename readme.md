@@ -31,7 +31,7 @@ consume the messages waiting in the queue. Your application requires no change t
 The service bus utilizes queues and since the service bus is transparent to the ConduitComponents this resiliency
 is for free.
 
-## Local message bus and the service bus
+## Message bus and service bus
 
 * The message bus is a bus internal to a Conduit (application or service). Messages marked as local only will 
 get published within the local message bus and not get publish to the distributed network via the service bus.
