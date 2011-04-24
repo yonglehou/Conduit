@@ -7,8 +7,8 @@ The design principals behind Conduit are:
 * An event based protocol layer on top of an Enterprise Service Bus (ESB).
 * Decoupling services should be simple.
 * Writing event driven services should be simple.
-* Service discovery.
-* Give you a foundation for writing services that can easily scale out for capacity growth and resiliency.
+* Supports service discovery.
+* Give you a foundation for writing services that can easily scale out for capacity growth and/or resiliency.
 * Provide a default easy to use service bus and queue technology but allow any service bus and queue 
 implementation to sit underneath.
 
@@ -29,7 +29,7 @@ to write internal only events that will not get published over the service bus.
 The message bus is a bus within the Conduit, the service bus is the distributed network. The message bus
 is connected to the service bus and makes the service bus transparent.
 
-This is how 2 Conduits distributed built with Conduit would look separated by the service bus.
+This is how 2 services distributed with Conduit look connected by the service bus.
 
     ComponentA <-> |=========|     |=========|     |=============|     |=========|     |=========| <-> ComponentC
                    | Msg Bus | <-> | Conduit | <-> | Service Bus | <-> | Conduit | <-> | Msg Bus |
@@ -58,8 +58,8 @@ into new Conduits distributed throughout the network.
 
 #### Namespaces
 Conduit uses a similar system as XMPP uses with XML namespaces for identifying types and capabilities. These
-namespaces get applied to messages, Conduits and ConduitComponents. These are strings and not Uri types but
-it is recommended you use a Uri scheme.
+namespaces get applied to messages, Conduits and ConduitComponents. Namespaces are defined as a string. 
+It is recommended you use a Uri scheme but this is not forced.
 
 #### Create a Message
     [ConduitMessageAttribute("http://company.com/Messages/Commands/ChangeCustomerAddress")]
@@ -82,6 +82,13 @@ it is recommended you use a Uri scheme.
     }
 
 #### Create a ConduitComponent
+Implementing the IHandle<T> interface is how your ConduitComponent receives messages from the local message bus
+and the service bus.
+
+Bus.Publish<T> is used for publishing messages to the local message bus. ConduitComponents within your Conduit who
+subscribe to this message will receive it first and then the Conduit will forward the message out over the service bus
+to distributed subscribers throughout the network.
+
     [ConduitComponent("http://company.com/Services/AccountService/CustomerProfileComponent")]
     class CustomerProfileComponent : ConduitComponent, IHandle<ChangeCustomerAddress>
     {
@@ -141,4 +148,4 @@ it is recommended you use a Uri scheme.
 
 This is a bare bones example of how to create a simple distributed Conduit system.
 More sample and functionality to come soon. Expect the base protocol to include more 
-common functionality as well.
+common functionality to support common needs required when writing distributed services.
