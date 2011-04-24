@@ -15,7 +15,6 @@ The design principals behind Conduit are:
 implementation to sit underneath.
 * An event based protocol layer on top of an Enterprise Service Bus (ESB).
 
-
 Conduit allows you to write components which participate on a distributed network and provides the
 ability to publish and subscribe messages in the form of commands/queries/events. Since Conduit is 
 an Event Driven Architecture, components communicate through publishing and subscribing to messages.
@@ -24,14 +23,18 @@ Conduit abstracts the service bus implementation and currently has 1 implementat
 New service bus implementations are possible. Developing with Conduit you shouldn't need to talk to the
 service bus directly.
 
-Publishing a message is a 2 stage process (under the hood automatically for you). Messages are published to 
-the local message bus and ConduitComponents who subscribe to the message within your Conduit will receive
-the message. The message is then sent out the service bus for distributed Conduits who subscribe to the 
-message type. Conduit supports a flag for indicating that a message should be local only. This allows you 
-to write internal only events that will not get published over the service bus.
+Conduit makes publishing and subscribing to messages over the distributed network simple. When a message 
+gets published, under the hood the message gets delivered to the local message bus and ConduitComponents 
+who subscribe to the message within your Conduit will receive the message. The message is then sent out the 
+service bus for distributed Conduits who subscribe to the message type. Conduit supports a flag for indicating 
+that a message should be local only. This allows you to write internal only events that will not get published 
+over the service bus.
 
-The message bus is a bus within the Conduit, the service bus is the distributed network. The message bus
-is connected to the service bus and makes the service bus transparent.
+#### Local message bus and the service bus
+
+* The message bus is a bus internal to a Conduit (application or service).
+* The service bus is the distributed network. The message bus is connected to the service bus and makes the 
+service bus transparent.
 
 This is how 2 services distributed with Conduit look connected by the service bus.
 
