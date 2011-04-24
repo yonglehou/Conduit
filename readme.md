@@ -52,8 +52,8 @@ Conduit has a message protocol on top of the service bus to help with common nee
 building a distributed service architecture. This message protocol supports service discovery and 
 capability discovery. A ConduitComponent can publish a FindAvailableServices query which will
 propogate the service bus. Every Conduit responds to this message by default allowing for your
-ConduitComponent to detect what capabilities exist on the network. This is all automatic, by
-building a ConduitComponent that subscribes to messages, the ConduitComponent already understands
+ConduitComponent to detect what capabilities exist on the network. This is all automatic. By
+creating a ConduitComponent that subscribes to messages, the ConduitComponent already understands
 what to send as a response to the query.
 
 ## How to get started
