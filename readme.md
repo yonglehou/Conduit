@@ -146,6 +146,6 @@ to distributed subscribers throughout the network.
     AccountConduit conduit = new AccountConduit(bus);
     conduit.Open();
 
-This is a bare bones example of how to create a simple distributed Conduit system.
-More sample and functionality to come soon. Expect the base protocol to include more 
-common functionality to support common needs required when writing distributed services.
+This is an example of how to create a simple distributed system using Conduit. More samples and 
+functionality to come soon. The base protocol will evolve to include more functionality to 
+support the needs required from building distributed services.
