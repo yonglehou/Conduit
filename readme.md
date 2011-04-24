@@ -103,8 +103,24 @@ subscribe to this message will receive it first and then the Conduit will forwar
 to distributed subscribers throughout the network.
 
     [ConduitComponent("http://company.com/Services/AccountService/CustomerProfileComponent")]
-    public class CustomerProfileComponent : ConduitComponent, IHandle<ChangeCustomerAddress>
+    public class CustomerProfileComponent : ConduitComponent, 
+        IHandle<BusOpened>,
+        IHandle<AnnounceServiceIdentity>,
+        IHandle<ChangeCustomerAddress>
     {
+        public void Handle(BusOpened message)
+        {
+            // The service bus has opened, lets send a query out to discover what services
+            // and capabilities exist on the distributed network.
+            Bus.Publish<FindAvailableServices>();
+        }
+
+        public void Handle(AnnounceServiceIdentity message)
+        {
+            // Now that we are receiving service identities with capabilities
+            // we could do something here if we wanted.
+        }
+
         public void Handle(ChangeCustomerAddress message)
         {
             // This message comes from either the local message bus or the service bus.
@@ -127,9 +143,7 @@ to distributed subscribers throughout the network.
 
 #### Create a Conduit
     [Conduit("http://company.com/Services/AccountService")]
-    public class AccountConduit : Conduit,
-        IHandle<BusOpened>,
-        IHandle<AnnounceServiceIdentity>
+    public class AccountConduit : Conduit
     {
         public AccountConduit(IServiceBus bus)
             : base(bus)
@@ -137,19 +151,6 @@ to distributed subscribers throughout the network.
             // Add all your ConduitComponents here to be included in the Conduit.
             this.Components.Add(new CustomerProfileComponent());
             this.Components.Add(new OrderComponent());
-        }
-
-        public void Handle(BusOpened message)
-        {
-            // The service bus has opened, lets send a query out to discover what services
-            // and capabilities exist on the distributed network.
-            Bus.Publish<FindAvailableServices>();
-        }
-
-        public void Handle(AnnounceServiceIdentity message)
-        {
-            // Now that we are receiving service identities with capabilities
-            // we could do something here if we wanted.
         }
     }
 
