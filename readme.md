@@ -127,11 +127,12 @@ to distributed subscribers throughout the network.
             // This is transparent to the ConduitComponent.
 
             // Example of updating the customer details.
-            Customer customer = repository.GetById(message.UserId);
+            Customer customer = repository.GetById(message.CustomerId);
             customer.Street = message.Street;
             customer.City = message.City;
             customer.State = message.State;
             customer.Country = message.Country;
+            customer.Save();
 
             // Publish an event about the customer address changing.
             // This event will traverse the Conduits local message loop and
