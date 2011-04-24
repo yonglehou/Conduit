@@ -1,6 +1,7 @@
 # Conduit
-Conduit is a framework for developing distributed services. The goal of Conduit is to make decoupled
-services a breeze and does so by promoting an Event Driven Architecture (EDA).
+Conduit is a framework for developing distributed services. The goal of Conduit is to make building 
+decoupled services a breeze by promoting an Event Driven Architecture (EDA) sitting on top of an 
+Enterprise Service Bus (ESB).
 
 The design principals behind Conduit are:
 
