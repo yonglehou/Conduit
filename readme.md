@@ -167,4 +167,6 @@ will evolve to include more functionality to support the needs required from bui
 
 * Basic instructions for getting a MassTransit server running.
 * More samples.
+* Correlation support in messages so that relating requests with responses is built in to ease the pain of developing
+on top of an event based system.
 * More functionality.
