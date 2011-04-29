@@ -45,7 +45,9 @@
     <Compile Include="ConduitAttribute.cs" />
     <Compile Include="ConduitComponent.cs" />
     <Compile Include="ConduitComponentAttribute.cs" />
+    <Compile Include="ILog.cs" />
     <Compile Include="IServiceBus.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="MessageBus.cs" />
     <Compile Include="Extensions\IEnumerable.cs" />
     <Compile Include="IHandle.cs" />
@@ -53,17 +55,29 @@
     <Compile Include="Messages\AnnounceServiceIdentity.cs" />
     <Compile Include="Messages\AnnounceComponentIdentity.cs" />
     <Compile Include="Messages\BusOpened.cs" />
-    <Compile Include="Messages\Message.cs" />
-    <Compile Include="Messages\MessageHelper.cs" />
-    <Compile Include="Messages\ConduitMessageAttribute.cs" />
-    <Compile Include="Messages\MessageNamespaceMissingException.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="MessageHelper.cs" />
+    <Compile Include="ConduitMessageAttribute.cs" />
+    <Compile Include="MessageNamespaceMissingException.cs" />
     <Compile Include="OptimizedObservableCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\Queries\FindAvailableComponents.cs" />
     <Compile Include="Messages\Queries\FindAvailableServices.cs" />
+    <Compile Include="Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Messages\Commands\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

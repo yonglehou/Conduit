@@ -46,13 +46,13 @@
         readonly Dictionary<Type, ConduitMessageAttribute> messageAttributes = 
             new Dictionary<Type, ConduitMessageAttribute>();
 
-        public MessageBus()
-        {
-        }
+        protected internal ILog Log { get; protected set; }
 
-        public MessageBus(IServiceBus bus)
+        public MessageBus(IServiceBus bus, ILog log)
         {
+            this.Log = log;
             this.bus = bus;
+            bus.MessageReceived += new MessageReceivedHandler(bus_MessageReceived);
         }
 
         /// <summary>
@@ -68,6 +68,32 @@
 
                 //Log.Info("Subscribing {0}.", instance);
                 handlers.Add(new Handler(instance));
+
+                // Subscribe to the service bus.
+                // Get a list of IHandle<T> this object supports.
+                string handleName = typeof(IHandle).Name;
+                Type[] interfaces = instance.GetType().GetInterfaces();
+
+                foreach (Type interfaceType in interfaces)
+                {
+                    if (interfaceType.IsGenericType)
+                    {
+                        if (interfaceType.Name.StartsWith(handleName))
+                        {
+                            MethodInfo method = bus.GetType().GetMethod("Subscribe");
+                            if (method.IsGenericMethod)
+                            {
+                                // Subscribe for the message type.
+                                Type[] messageTypes = interfaceType.GetGenericArguments();
+                                if (messageTypes.Length > 0)
+                                {
+                                    MethodInfo m = method.MakeGenericMethod(messageTypes[0]);
+                                    m.Invoke(bus, null);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -102,7 +128,7 @@
         public void Publish<T>(T message) where T : Message
         {
             // Publish to the local EventAggregator loop first.
-            this.Publish((object)message);
+            //this.Publish((object)message);
 
             // Then send over the Service Bus wire.
             if (bus != null)
@@ -111,7 +137,23 @@
                 ConduitMessageAttribute messageAttribute = AddMessageInfo(message);
                 if (messageAttribute != null && messageAttribute.Local == false)
                 {
+                    if (Log.IsInfoEnabled)
+                    {
+                        Log.Info(string.Format("BUS-SEND: {0}",
+                            message.GetType().Name));
+                    }
+
                     bus.Publish<T>(message);
+                }
+                else
+                {
+                    if (Log.IsInfoEnabled)
+                    {
+                        Log.Info(string.Format("MSG-SEND: {0}",
+                            message.GetType().Name));
+                    }
+
+                    this.Publish((object)message);
                 }
             }
         }
@@ -140,22 +182,38 @@
             //});
         }
 
+        private void bus_MessageReceived(Message message)
+        {
+            if (Log.IsInfoEnabled)
+            {
+                Log.Info(string.Format("BUS-RECV: {0}",
+                    message.GetType().Name));
+            }
+
+            // Message received from the service bus. Publish it on the local message bus.
+            Publish((object)message);
+        }
+
         private ConduitMessageAttribute AddMessageInfo(object message)
         {
             ConduitMessageAttribute messageAttribute;
             Type messageType = message.GetType();
-            if (!messageAttributes.TryGetValue(messageType, out messageAttribute))
+
+            lock (messageAttributes)
             {
-                messageAttribute = MessageHelper.GetMessageInfo(messageType);
-                if (messageAttribute != null)
+                if (!messageAttributes.TryGetValue(messageType, out messageAttribute))
                 {
-                    // We hold a cache of message type and message attribute
-                    // so that we can pull this info out and make decisions.
-                    messageAttributes.Add(messageType, messageAttribute);
-                }
-                if (messageAttribute == null || string.IsNullOrWhiteSpace(messageAttribute.Namespace))
-                {
-                    throw new MessageNamespaceMissingException("Message does not define a namespace");
+                    messageAttribute = MessageHelper.GetMessageInfo(messageType);
+                    if (messageAttribute != null)
+                    {
+                        // We hold a cache of message type and message attribute
+                        // so that we can pull this info out and make decisions.
+                        messageAttributes.Add(messageType, messageAttribute);
+                    }
+                    if (messageAttribute == null || string.IsNullOrWhiteSpace(messageAttribute.Namespace))
+                    {
+                        throw new MessageNamespaceMissingException("Message does not define a namespace");
+                    }
                 }
             }
             return messageAttribute;

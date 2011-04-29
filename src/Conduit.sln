@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{32BEEC01
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Conduit.Bus.MassTransit", "Conduit.Bus.MassTransit\Conduit.Bus.MassTransit.csproj", "{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{42C44E2E-FAAE-43CC-9FDE-6EB55E6B0FE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageLoadSample", "Samples\MessageLoadSample\MessageLoadSample.csproj", "{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Conduit.vsmdi
@@ -59,11 +63,22 @@ Global
 		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{CE60DDBB-1F6A-40BC-86AE-75EF4D298DF8}.Release|x86.ActiveCfg = Release|Any CPU
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Debug|x86.ActiveCfg = Debug|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Debug|x86.Build.0 = Debug|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Release|Any CPU.ActiveCfg = Release|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Release|Mixed Platforms.Build.0 = Release|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Release|x86.ActiveCfg = Release|x86
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{AD3F2B77-6CC3-4D60-A3C8-117B9B3B5C41} = {32BEEC01-AE6E-4EF8-8610-AFBEA5173298}
+		{6BC97A8D-E7FD-4444-84C3-FAC85CD658EC} = {42C44E2E-FAAE-43CC-9FDE-6EB55E6B0FE1}
 	EndGlobalSection
 EndGlobal

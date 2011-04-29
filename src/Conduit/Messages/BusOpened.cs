@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Conduit.Messages
 {
-    [ConduitMessageAttribute(Uri)]
+    [ConduitMessageAttribute(Uri, true)]
     public class BusOpened : Message
     {
         public const string Uri = "http://Conduit/Messages/BusOpened";

@@ -15,20 +15,34 @@ namespace Conduit
     {
         private IServiceBus serviceBus = null;
         private List<string> capabilities = null;
+        private bool opened = false;
 
         public Conduit(IServiceBus serviceBus)
-            : this(serviceBus, null)
+            : this(serviceBus, null, null)
         {
         }
 
         public Conduit(IServiceBus serviceBus, List<ConduitComponent> components)
         {
+
+        }
+
+        public Conduit(IServiceBus serviceBus, List<ConduitComponent> components, ILog log)
+        {
+            if (log == null)
+            {
+                // Setup the default logger.
+                log = new Log();
+            }
+            this.Log = log;
+
             this.Id = Guid.NewGuid();
+            Log.Info("Starting Conduit: " + this.Id);
+
             this.serviceBus = serviceBus;
             this.capabilities = new List<string>();
 
-            this.Bus = new MessageBus(serviceBus);
-            this.Bus.Subscribe(this);
+            this.Bus = new MessageBus(serviceBus, this.Log);
 
             if (this.Components == null)
             {
@@ -42,6 +56,8 @@ namespace Conduit
                 this.Components.AddRange(components);
             }
         }
+
+        public ILog Log { get; private set; }
 
         public Guid Id { get; private set; }
 
@@ -98,16 +114,20 @@ namespace Conduit
 
         void Components_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            // Handle when a new component is added to the conduit.
-            if (e.NewItems != null)
+            if (opened)
             {
-                foreach (var item in e.NewItems)
+                // Handle when a new component is added to the conduit.
+                if (e.NewItems != null)
                 {
-                    ConduitComponent component = item as ConduitComponent;
-                    if (component != null)
+                    foreach (var item in e.NewItems)
                     {
-                        component.Events = this.Bus;
-                        Bus.Subscribe(component);
+                        ConduitComponent component = item as ConduitComponent;
+                        if (component != null)
+                        {
+                            component.Log = Log;
+                            component.Events = this.Bus;
+                            Bus.Subscribe(component);
+                        }
                     }
                 }
             }
@@ -117,8 +137,20 @@ namespace Conduit
         {
             serviceBus.Open();
 
+            // Initialize subscriptions
+            this.Bus.Subscribe(this);
+
+            foreach (ConduitComponent component in this.Components)
+            {
+                component.Events = this.Bus;
+                component.Log = this.Log;
+                Bus.Subscribe(component);
+            }
+
             Bus.Publish<FindAvailableComponents>();
             Bus.Publish<BusOpened>();
+
+            opened = true;
         }
 
         #region Message Handling

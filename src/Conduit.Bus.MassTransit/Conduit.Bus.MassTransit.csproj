@@ -32,31 +32,31 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=1.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\Castle.Core.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Castle.DynamicProxy2, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\Castle.DynamicProxy2.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\Castle.DynamicProxy2.dll</HintPath>
     </Reference>
     <Reference Include="Castle.MicroKernel, Version=2.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\Castle.MicroKernel.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\Castle.MicroKernel.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Windsor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\Castle.Windsor.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\log4net.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Magnum, Version=0.8.180.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\Magnum.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\Magnum.dll</HintPath>
     </Reference>
     <Reference Include="MassTransit, Version=0.8.370.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\MassTransit.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\MassTransit.dll</HintPath>
     </Reference>
     <Reference Include="MassTransit.Transports.Msmq, Version=0.8.370.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\MassTransit.Transports.Msmq.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\MassTransit.Transports.Msmq.dll</HintPath>
     </Reference>
     <Reference Include="MassTransit.WindsorIntegration, Version=0.8.370.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\dependencies\MassTransit\NETFX40\MassTransit.WindsorIntegration.dll</HintPath>
+      <HintPath>..\..\lib\MassTransit\NETFX40\MassTransit.WindsorIntegration.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -67,19 +67,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Consumer.cs" />
     <Compile Include="MassTransitBus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="windsor.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Conduit\Conduit.csproj">
       <Project>{B133E29F-C220-4ADE-B3E9-E396B06A3CC6}</Project>
       <Name>Conduit</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="windsor.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

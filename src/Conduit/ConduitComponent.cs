@@ -63,11 +63,16 @@ namespace Conduit
         }
 
         protected internal IMessageBus Events { get; internal set; }
+        protected internal ILog Log { get; internal set; }
 
         #region Message Handling
         public void Handle(FindAvailableComponents message)
         {
             List<string> capabilities = MessageHelper.GetCapabilities(this);
+
+            //Log.Info(string.Format("Announcing Component Identity: {0} {1}",
+            //    this.Name,
+            //    this.Namespace));
 
             Events.Publish<AnnounceComponentIdentity>(new AnnounceComponentIdentity(
                 this.Name,

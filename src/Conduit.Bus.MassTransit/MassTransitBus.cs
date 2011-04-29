@@ -3,16 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Castle.MicroKernel.Registration;
 using MassTransit;
 using MassTransit.Transports.Msmq;
 using MassTransit.WindsorIntegration;
+using MassTransit.Internal;
 
 using IMassTransitServiceBus = MassTransit.IServiceBus;
+using System.Threading;
 
 namespace Conduit.Bus.MassTransit
 {
     public class MassTransitBus : IServiceBus
     {
+        public event MessageReceivedHandler MessageReceived;
+
         private bool disposed = false;
         private DefaultMassTransitContainer container = null;
         private IMassTransitServiceBus bus = null;
@@ -62,17 +67,37 @@ namespace Conduit.Bus.MassTransit
             });
 
             container = new DefaultMassTransitContainer("windsor.xml");
+
             bus = container.Resolve<IMassTransitServiceBus>();
         }
 
-        public void Publish<T>(T message) where T : class
+        public void Subscribe<T>() where T : Message
+        {
+            container.Register(Component.For<Consumer<T>>().LifeStyle.Transient);            
+            var consumer = container.Resolve<Consumer<T>>();
+
+            if (consumer != null)
+            {
+                consumer.Bus = this;
+                consumer.Start(bus);
+            }
+        }
+
+        public void Publish<T>(T message) where T : Message
         {
             bus.Publish<T>(message);
         }
 
-        public void Subscribe<T>() where T : class
+        internal void Inject(Message message)
         {
-            bus.Subscribe<T>();
+            ThreadPool.QueueUserWorkItem((o) =>
+                {
+                    MessageReceivedHandler evt = MessageReceived;
+                    if (evt != null)
+                    {
+                        evt(message);
+                    }
+                });
         }
     }
 }
