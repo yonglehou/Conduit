@@ -19,6 +19,7 @@ namespace Conduit
         }
 
         public Guid Id { get; private set; }
+        public Guid SourceId { get; internal set; }
         public DateTimeOffset TimeStamp { get; private set; }
     }
 }

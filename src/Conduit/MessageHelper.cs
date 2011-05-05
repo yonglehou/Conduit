@@ -7,8 +7,6 @@ namespace Conduit
 {
     public class MessageHelper
     {
-        private static Type messageNamespaceType = null;
- 
         public static List<string> GetCapabilities(object obj)
         {
             List<string> capabilities = new List<string>();
@@ -16,57 +14,18 @@ namespace Conduit
             string handleName = typeof(IHandle).Name;
             Type[] interfaces = obj.GetType().GetInterfaces();
 
-            if (messageNamespaceType == null)
-            {
-                messageNamespaceType = typeof(ConduitMessageAttribute);
-            }
+            IEnumerable<Type> handles = interfaces.Where(x => x.Name.StartsWith(handleName));
 
-            foreach (Type i in interfaces)
+            foreach (Type i in handles)
             {
-                if (i.Name.StartsWith(handleName))
+                Type[] messageTypes = i.GetGenericArguments();
+                if (messageTypes.Count() > 0)
                 {
-                    Type[] messageTypes = i.GetGenericArguments();
-                    if (messageTypes.Count() > 0)
-                    {
-                        Type messageType = messageTypes[0];
-                        ConduitMessageAttribute attrib = GetMessageInfo(messageType);
-                        if (attrib != null)
-                        {
-                            if (!string.IsNullOrEmpty(attrib.Namespace))
-                            {
-                                capabilities.Add(attrib.Namespace);
-                            }
-                        }
-                    }
+                    Type messageType = messageTypes[0];
+                    capabilities.Add(messageType.FullName);
                 }
             }
             return capabilities;
-        }
-
-        public static ConduitMessageAttribute GetMessageInfo(object message)
-        {
-            return GetMessageInfo(message.GetType());
-        }
-
-        public static ConduitMessageAttribute GetMessageInfo(Type messageType)
-        {
-            string ns = string.Empty;
-
-            if (messageNamespaceType == null)
-            {
-                messageNamespaceType = typeof(ConduitMessageAttribute);
-            }
-
-            object[] attributes = messageType.GetCustomAttributes(messageNamespaceType, true);
-            if (attributes.Count() > 0)
-            {
-                ConduitMessageAttribute messageNamespace = attributes[0] as ConduitMessageAttribute;
-                if (ns != null)
-                {
-                    return messageNamespace;
-                }
-            }
-            return null;
         }
     }
 }

@@ -48,8 +48,14 @@
     <Compile Include="LoadConduit.cs" />
     <Compile Include="Messages\Commands\ClearCommand.cs" />
     <Compile Include="Messages\Commands\StartCommand.cs" />
+    <Compile Include="Messages\Commands\UnsubscribeCommand.cs" />
+    <Compile Include="Messages\ConsistencyMessage.cs" />
+    <Compile Include="Messages\PingMessage.cs" />
+    <Compile Include="Messages\Queries\QueryConsistency.cs" />
+    <Compile Include="Messages\Queries\QueryPing.cs" />
     <Compile Include="Messages\Queries\QueryStatus.cs" />
     <Compile Include="Messages\StatusMessage.cs" />
+    <Compile Include="Messages\TestCompleteMessage.cs" />
     <Compile Include="Messages\TestMessage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

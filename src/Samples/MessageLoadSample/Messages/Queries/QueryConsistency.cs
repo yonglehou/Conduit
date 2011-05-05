@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Conduit.Messages
+using Conduit;
+
+namespace MessageLoadSample.Messages.Queries
 {
-    public class BusOpened : Message
+    public class QueryConsistency : Message
     {
     }
 }

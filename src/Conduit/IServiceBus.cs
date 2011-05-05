@@ -13,7 +13,7 @@ namespace Conduit
 
         void Open();
         void Publish<T>(T message) where T : Message;
-        //void Subscribe<T>(T consumer) where T : class;
         void Subscribe<T>() where T : Message;
+        void Unsubscribe<T>() where T : Message;
     }
 }

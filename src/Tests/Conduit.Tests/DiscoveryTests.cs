@@ -16,11 +16,6 @@ namespace Conduit.Tests
     [TestClass]
     public class DiscoveryTests
     {
-        private const string TestConduitName = "TestConduit";
-        private const string TestConduitUri = "http://Test/TestConduit";
-        private const string TestComponentName = "TestComponent";
-        private const string TestComponentUri = "http://Test/TestConduit/TestComponent";
-
         public DiscoveryTests()
         {
         }
@@ -73,16 +68,16 @@ namespace Conduit.Tests
 
             Assert.AreEqual<int>(1, host.BusOpenedCount, "Expected 1 BusOpened messages");
             Assert.AreEqual<int>(1, host.AnnounceServiceIdentityCount, "Expected only 1 AnnounceServiceIdentityCount messages");
-            Assert.AreEqual<string>(TestConduitName, host.AnnounceServiceIdentity.Name, "Conduit Name should match");
+            Assert.AreEqual<string>("TestConduit", host.AnnounceServiceIdentity.Name, "Conduit Name should match");
+            Assert.AreEqual<string>("Conduit.Tests.DiscoveryTests+TestConduit", host.AnnounceServiceIdentity.Type, "Conduit Type should match");
             Assert.AreEqual<int>(7, host.AnnounceServiceIdentity.Capabilities.Count(), "Expected 7 capabilities");
             Assert.AreEqual<int>(1, host.AnnounceServiceIdentity.Capabilities.Where(
-                x => x == TestMessage1.Uri).Count(), "Expected TestMessage1 capability");
+                x => x == "Conduit.Tests.TestMessage1").Count(), "Expected TestMessage1 capability");
             Assert.AreEqual<int>(1, host.AnnounceServiceIdentity.Capabilities.Where(
-                x => x == TestMessage2.Uri).Count(), "Expected TestMessage2 capability");
+                x => x == "Conduit.Tests.TestMessage2").Count(), "Expected TestMessage2 capability");
         }
 
-        [Conduit(TestConduitUri)]
-        class TestConduit : Conduit,
+        class TestConduit : ConduitNode,
             IHandle<BusOpened>,
             IHandle<AnnounceServiceIdentity>
         {
@@ -104,11 +99,10 @@ namespace Conduit.Tests
             public void Handle(BusOpened message)
             {
                 this.BusOpenedCount++;
-                Bus.Publish<FindAvailableServices>();
+                Publish<FindAvailableServices>();
             }
         }
 
-        [ConduitComponent(TestComponentUri)]
         class TestComponent : ConduitComponent,
             IHandle<TestMessage1>,
             IHandle<TestMessage2>
@@ -144,21 +138,21 @@ namespace Conduit.Tests
             {
             }
 
+            public void Unsubscribe<T>() where T : Message
+            {
+            }
+
             public void Dispose()
             {
             }
         }
+    }
 
-        [ConduitMessageAttribute(Uri)]
-        public class TestMessage1 : Message
-        {
-            public const string Uri = "http://test/messages/TestMessage1";
-        }
+    public class TestMessage1 : Message
+    {
+    }
 
-        [ConduitMessageAttribute(Uri)]
-        public class TestMessage2 : Message
-        {
-            public const string Uri = "http://test/messages/TestMessage2";
-        }
+    public class TestMessage2 : Message
+    {
     }
 }

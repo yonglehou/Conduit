@@ -9,76 +9,67 @@ using Conduit.Messages.Queries;
 namespace Conduit
 {
     public abstract class ConduitComponent :
+        IMessageBus,
         IHandle<FindAvailableComponents>
     {
+        private static Type type = null;
+
         public ConduitComponent()
         {
             this.Id = Guid.NewGuid();
         }
 
         public Guid Id { get; private set; }
+        public Guid NodeId { get; internal set; }
 
-        private string name = string.Empty;
-        ///// <summary>
-        ///// This is the name of your Component.
-        ///// </summary>
-        public string Name
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(name))
-                {
-                    name = this.GetType().Name;
-                }
-                return name;
-            }
-        }
-
-        private string ns = string.Empty;
-        ///// <summary>
-        ///// Namespace identifier for the Component within the distributed system. Using a Uri is suggested.
-        ///// </summary>
-        ///// <example>
-        ///// http://company.com/component/mycomponent
-        ///// </example>
-        public string Namespace
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(ns))
-                {
-                    Type attributeType = typeof(ConduitComponentAttribute);
-                    object[] attributes = this.GetType().GetCustomAttributes(attributeType, true);
-                    if (attributes.Count() > 0)
-                    {
-                        ConduitComponentAttribute attrib = attributes[0] as ConduitComponentAttribute;
-                        if (ns != null)
-                        {
-                            ns = attrib.Namespace;
-                        }
-                    }
-                }
-                return ns;
-            }
-        }
-
-        protected internal IMessageBus Events { get; internal set; }
+        internal IMessageBus Bus { get; set; }
         protected internal ILog Log { get; internal set; }
+
+        public void Subscribe(object instance)
+        {
+            Bus.Subscribe(instance);
+        }
+
+        public void Unsubscribe(object instance)
+        {
+            Bus.Unsubscribe(instance);
+        }
+
+        public void Publish<T>() where T : Message, new()
+        {
+            Bus.Publish<T>();
+        }
+
+        public void Publish<T>(bool local) where T : Message, new()
+        {
+            Bus.Publish<T>(local);
+        }
+
+        public void Publish<T>(T message) where T : Message
+        {
+            Bus.Publish<T>(message);
+        }
+
+        public void Publish<T>(T message, bool local) where T : Message
+        {
+            Bus.Publish<T>(message, local);
+        }
 
         #region Message Handling
         public void Handle(FindAvailableComponents message)
         {
             List<string> capabilities = MessageHelper.GetCapabilities(this);
 
-            //Log.Info(string.Format("Announcing Component Identity: {0} {1}",
-            //    this.Name,
-            //    this.Namespace));
+            if (type == null)
+            {
+                type = this.GetType();
+            }
 
-            Events.Publish<AnnounceComponentIdentity>(new AnnounceComponentIdentity(
-                this.Name,
-                this.Namespace,
+            Bus.Publish<AnnounceComponentIdentity>(new AnnounceComponentIdentity(
+                type.Name,
+                type.FullName,
                 capabilities
-                ));
+                ), true);
         }
         #endregion
     }

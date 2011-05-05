@@ -7,7 +7,6 @@ using Conduit;
 
 namespace MessageLoadSample.Messages.Queries
 {
-    [ConduitMessage("http://Conduit/Samples/MessageLoadSample/QueryStatus")]
     public class QueryStatus : Message
     {
         public QueryStatus()

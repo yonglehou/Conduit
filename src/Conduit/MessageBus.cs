@@ -25,12 +25,14 @@
         void Unsubscribe(object instance);
 
         void Publish<T>() where T : Message, new();
+        void Publish<T>(bool local) where T : Message, new();
 
         /// <summary>
         ///   Publishes a message.
         /// </summary>
         /// <param name = "message">The message instance.</param>
         void Publish<T>(T message) where T : Message;
+        void Publish<T>(T message, bool local) where T : Message;
     }
 
     /// <summary>
@@ -40,19 +42,14 @@
     {
         //static readonly ILog Log = LogManager.GetLog(typeof(EventAggregator));
         readonly List<Handler> handlers = new List<Handler>();
-
-        readonly IServiceBus bus = null;
-
-        readonly Dictionary<Type, ConduitMessageAttribute> messageAttributes = 
-            new Dictionary<Type, ConduitMessageAttribute>();
-
+        readonly IServiceBus serviceBus = null;
         protected internal ILog Log { get; protected set; }
 
-        public MessageBus(IServiceBus bus, ILog log)
+        public MessageBus(IServiceBus serviceBus, ILog log)
         {
             this.Log = log;
-            this.bus = bus;
-            bus.MessageReceived += new MessageReceivedHandler(bus_MessageReceived);
+            this.serviceBus = serviceBus;
+            this.serviceBus.MessageReceived += new MessageReceivedHandler(serviceBus_MessageReceived);
         }
 
         /// <summary>
@@ -80,7 +77,7 @@
                     {
                         if (interfaceType.Name.StartsWith(handleName))
                         {
-                            MethodInfo method = bus.GetType().GetMethod("Subscribe");
+                            MethodInfo method = serviceBus.GetType().GetMethod("Subscribe");
                             if (method.IsGenericMethod)
                             {
                                 // Subscribe for the message type.
@@ -88,7 +85,7 @@
                                 if (messageTypes.Length > 0)
                                 {
                                     MethodInfo m = method.MakeGenericMethod(messageTypes[0]);
-                                    m.Invoke(bus, null);
+                                    m.Invoke(serviceBus, null);
                                 }
                             }
                         }
@@ -112,7 +109,12 @@
             }
         }
 
-        public void Publish<T>() where T : Message, new() 
+        public void Publish<T>() where T : Message, new()
+        {
+            this.Publish<T>(false);
+        }
+
+        public void Publish<T>(bool local) where T : Message, new() 
         {
             T message = new T();
             if (message != null)
@@ -127,26 +129,21 @@
 
         public void Publish<T>(T message) where T : Message
         {
+            Publish<T>(message, false);
+        }
+
+        public void Publish<T>(T message, bool local) where T : Message
+        {
             // Publish to the local EventAggregator loop first.
             //this.Publish((object)message);
 
             // Then send over the Service Bus wire.
-            if (bus != null)
+            if (serviceBus != null)
             {
                 // If the message is local only, don't send it over the Service Bus wire.
-                ConduitMessageAttribute messageAttribute = AddMessageInfo(message);
-                if (messageAttribute != null && messageAttribute.Local == false)
+                if (local)
                 {
-                    if (Log.IsInfoEnabled)
-                    {
-                        Log.Info(string.Format("BUS-SEND: {0}",
-                            message.GetType().Name));
-                    }
-
-                    bus.Publish<T>(message);
-                }
-                else
-                {
+                    // Send only to the local message bus.
                     if (Log.IsInfoEnabled)
                     {
                         Log.Info(string.Format("MSG-SEND: {0}",
@@ -154,6 +151,17 @@
                     }
 
                     this.Publish((object)message);
+                }
+                else
+                {
+                    // Send to the service bus.
+                    if (Log.IsInfoEnabled)
+                    {
+                        Log.Info(string.Format("BUS-SEND: {0}",
+                            message.GetType().Name));
+                    }
+
+                    serviceBus.Publish<T>(message);
                 }
             }
         }
@@ -182,7 +190,7 @@
             //});
         }
 
-        private void bus_MessageReceived(Message message)
+        private void serviceBus_MessageReceived(Message message)
         {
             if (Log.IsInfoEnabled)
             {
@@ -192,31 +200,6 @@
 
             // Message received from the service bus. Publish it on the local message bus.
             Publish((object)message);
-        }
-
-        private ConduitMessageAttribute AddMessageInfo(object message)
-        {
-            ConduitMessageAttribute messageAttribute;
-            Type messageType = message.GetType();
-
-            lock (messageAttributes)
-            {
-                if (!messageAttributes.TryGetValue(messageType, out messageAttribute))
-                {
-                    messageAttribute = MessageHelper.GetMessageInfo(messageType);
-                    if (messageAttribute != null)
-                    {
-                        // We hold a cache of message type and message attribute
-                        // so that we can pull this info out and make decisions.
-                        messageAttributes.Add(messageType, messageAttribute);
-                    }
-                    if (messageAttribute == null || string.IsNullOrWhiteSpace(messageAttribute.Namespace))
-                    {
-                        throw new MessageNamespaceMissingException("Message does not define a namespace");
-                    }
-                }
-            }
-            return messageAttribute;
         }
 
         class Handler

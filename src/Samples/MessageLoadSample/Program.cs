@@ -30,39 +30,33 @@ namespace MessageLoadSample
 
                 switch (cmd)
                 {
+                    case "check":
+                        conduit.Publish<QueryConsistency>();
+                        break;
                     case "clear":
-                        conduit.Bus.Publish<ClearCommand>();
+                        conduit.Publish<ClearCommand>();
                         break;
                     case "status":
-                        conduit.Bus.Publish<QueryStatus>();
+                        conduit.Publish<QueryStatus>();
                         break;
                     case "test":
-                        Test(int.Parse(cmdline[1]));
+                        int cnt = int.Parse(cmdline[1]);
+                        bool async = false;
+                        if (cmdline.Length > 2 && cmdline[2].ToLowerInvariant() == "async")
+                        {
+                            async = true;
+                        }
+                        conduit.Publish<StartCommand>(new StartCommand(cnt, async));
+                        break;
+                    case "ping":
+                        LoadComponent component = conduit.Components[0] as LoadComponent;
+                        component.Ping();
+                        break;
+                    case "unsubscribe":
+                        conduit.Publish<UnsubscribeCommand>();
                         break;
                 }
             }
-        }
-
-        private static void Test(int count)
-        {
-            //DateTimeOffset startTime = DateTimeOffset.Now;
-
-            conduit.Bus.Publish<StartCommand>(new StartCommand(count));
-            //for(int i=0; i<count; i++)
-            //{
-            //    ThreadPool.QueueUserWorkItem((o) =>
-            //    {
-            //        conduit.Bus.Publish<TestMessage>(new TestMessage(i));
-            //    });
-                
-            //}
-
-            //DateTimeOffset endTime = DateTimeOffset.Now;
-            //TimeSpan duration = endTime - startTime;
-            //Console.WriteLine(string.Format("{0} messages sent in {1} for a rate of {2:0.00} msgs/second",
-            //    count.ToString(),
-            //    duration.ToString(),
-            //    count / duration.TotalSeconds));
         }
     }
 }

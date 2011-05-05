@@ -9,25 +9,28 @@ using Conduit.Messages.Queries;
 
 namespace Conduit
 {
-    public class Conduit : 
+    public class ConduitNode : 
+        IMessageBus,
         IHandle<FindAvailableServices>,
         IHandle<AnnounceComponentIdentity>
     {
+        private static Type type = null;
+
         private IServiceBus serviceBus = null;
         private List<string> capabilities = null;
         private bool opened = false;
 
-        public Conduit(IServiceBus serviceBus)
+        public ConduitNode(IServiceBus serviceBus)
             : this(serviceBus, null, null)
         {
         }
 
-        public Conduit(IServiceBus serviceBus, List<ConduitComponent> components)
+        public ConduitNode(IServiceBus serviceBus, List<ConduitComponent> components)
         {
 
         }
 
-        public Conduit(IServiceBus serviceBus, List<ConduitComponent> components, ILog log)
+        public ConduitNode(IServiceBus serviceBus, List<ConduitComponent> components, ILog log)
         {
             if (log == null)
             {
@@ -36,7 +39,7 @@ namespace Conduit
             }
             this.Log = log;
 
-            this.Id = Guid.NewGuid();
+            this.Id = Guid.NewGuid();            
             Log.Info("Starting Conduit: " + this.Id);
 
             this.serviceBus = serviceBus;
@@ -61,56 +64,12 @@ namespace Conduit
 
         public Guid Id { get; private set; }
 
-        private string name = string.Empty;
-        ///// <summary>
-        ///// This is the name of your Component.
-        ///// </summary>
-        public string Name
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(name))
-                {
-                    name = this.GetType().Name;
-                }
-                return name;
-            }
-        }
-
-        private string ns = string.Empty;
-        ///// <summary>
-        ///// Namespace identifier for the Component within the distributed system. Using a Uri is suggested.
-        ///// </summary>
-        ///// <example>
-        ///// http://company.com/component/mycomponent
-        ///// </example>
-        public string Namespace
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(ns))
-                {
-                    Type attributeType = typeof(ConduitAttribute);
-                    object[] attributes = this.GetType().GetCustomAttributes(attributeType, true);
-                    if (attributes.Count() > 0)
-                    {
-                        ConduitAttribute attrib = attributes[0] as ConduitAttribute;
-                        if (ns != null)
-                        {
-                            ns = attrib.Namespace;
-                        }
-                    }
-                }
-                return ns;
-            }
-        }
-
         /// <summary>
         /// List of Components available in the Conduit service.
         /// </summary>
         public OptimizedObservableCollection<ConduitComponent> Components { get; private set; }
 
-        public IMessageBus Bus { get; private set; }
+        private IMessageBus Bus { get; set; }
 
         void Components_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -124,8 +83,9 @@ namespace Conduit
                         ConduitComponent component = item as ConduitComponent;
                         if (component != null)
                         {
+                            component.NodeId = this.Id;
                             component.Log = Log;
-                            component.Events = this.Bus;
+                            component.Bus = this;
                             Bus.Subscribe(component);
                         }
                     }
@@ -142,20 +102,63 @@ namespace Conduit
 
             foreach (ConduitComponent component in this.Components)
             {
-                component.Events = this.Bus;
+                component.NodeId = this.Id;
+                component.Bus = this;
                 component.Log = this.Log;
                 Bus.Subscribe(component);
             }
 
-            Bus.Publish<FindAvailableComponents>();
-            Bus.Publish<BusOpened>();
+            Bus.Publish<FindAvailableComponents>(true);
+            Bus.Publish<BusOpened>(true);
 
             opened = true;
+        }
+
+        public void Subscribe(object instance)
+        {
+            Bus.Subscribe(instance);
+        }
+
+        public void Unsubscribe(object instance)
+        {
+            Bus.Unsubscribe(instance);
+        }
+
+        public void Publish<T>() where T : Message, new()
+        {
+            T message = ObjectActivator.New<T>();
+            message.SourceId = this.Id;
+            Bus.Publish<T>(message);
+        }
+
+        public void Publish<T>(bool local) where T : Message, new()
+        {
+            T message = ObjectActivator.New<T>();
+
+            message.SourceId = this.Id;
+            Bus.Publish<T>(message, local);
+        }
+
+        public void Publish<T>(T message) where T : Message
+        {
+            message.SourceId = this.Id;
+            Bus.Publish<T>(message);
+        }
+
+        public void Publish<T>(T message, bool local) where T : Message
+        {
+            message.SourceId = this.Id;
+            Bus.Publish<T>(message, local);
         }
 
         #region Message Handling
         public void Handle(FindAvailableServices message)
         {
+            if (type == null)
+            {
+                type = this.GetType();
+            }
+
             List<string> mergedCapabilities = new List<string>();
 
             // Add the capabilities from this Conduit.
@@ -165,8 +168,8 @@ namespace Conduit
             mergedCapabilities.AddRange(capabilities);
 
             Bus.Publish<AnnounceServiceIdentity>(new AnnounceServiceIdentity(
-                this.Name,
-                this.Namespace,
+                type.Name,
+                type.FullName,
                 mergedCapabilities
                 ));
         }

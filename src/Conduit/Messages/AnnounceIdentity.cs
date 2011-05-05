@@ -7,10 +7,10 @@ namespace Conduit.Messages
 {
     public abstract class AnnounceIdentity : Message
     {
-        public AnnounceIdentity(string name, string @namespace, IList<string> capabilities)
+        public AnnounceIdentity(string name, string type, IList<string> capabilities)
         {
             this.Name = name;
-            this.Namespace = @namespace;
+            this.Type = type;
             this.Capabilities = capabilities;
         }
         
@@ -20,24 +20,18 @@ namespace Conduit.Messages
         public string Name { get; private set; }
 
         /// <summary>
-        /// Namespace identifier for the Component or Service within the distributed system. Using a Uri is suggested.
+        /// Type identifier for the Component or Service within the distributed system.
         /// </summary>
         /// <example>
-        /// http://company.com/service/myservice
-        /// or
-        /// http://company.com/component/mycomponent
+        /// Conduit.Messages.FindAvailableServices
         /// </example>
-        public string Namespace { get; private set; }
+        public string Type { get; private set; }
 
         /// <summary>
         /// List of capabilities this Component or Service supports.
         /// </summary>
         /// <example>
-        /// http://company.com/protocol/capabilityname
-        /// or
-        /// http://company.com/protocol/capabilityname#version
-        /// or
-        /// service:protocol:capability
+        /// Conduit.Messages.FindAvailableServices
         /// </example>
         public IList<string> Capabilities { get; private set; }
     }

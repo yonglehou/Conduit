@@ -58,24 +58,18 @@ what to send as a response to the query.
 
 ## How to get started
 Building an array of services and components is simple using Conduit. The two key classes are a 
-Conduit and a ConduitComponent.
+ConduitNode and a ConduitComponent.
 
-A Conduit represents your application or service. You should only have one of these in your process.
-A Conduit can contain many Components.
+ConduitNode represents your application or service. You should only have one of these in your process.
+A node can contain many components.
 
-ConduitComponents makes up the functionality of your application or service. You should have many of these
-and they will likely communicate with each other. You should break your ConduitComponents based on
+ConduitComponent makes up the functionality of your application or service. You should have many of these
+and they will likely communicate with each other. You should break up your components based on
 responsibility. One of the benefits to EDA is the ability to plug in and out functionality because
-of the loose coupling. Another benefit is if you need to scale out later you can move your ConduitComponents
-into new Conduits distributed throughout the network.
-
-#### Namespaces
-Conduit uses a similar system that XML uses with namespaces for identifying types and capabilities. These
-namespaces get applied to messages, Conduits and ConduitComponents. Namespaces are defined as a string. 
-It is recommended you use a Uri scheme but this is not forced.
+of the loose coupling. Another benefit is if you need to scale out later you can move your components
+into new nodes distributed throughout the network.
 
 #### Create a Message
-    [ConduitMessageAttribute("http://company.com/Messages/Commands/ChangeCustomerAddress")]
     public class ChangeCustomerAddress : Message
     {
         public void ChangeCustomerAddress(Guid userId, string street, string city, string state, string country)
@@ -95,14 +89,13 @@ It is recommended you use a Uri scheme but this is not forced.
     }
 
 #### Create a Component
-Implementing the IHandle interface is how your Component receives messages from the local message bus
+Implementing the IHandle interface is how your component receives messages from the local message bus
 and the service bus.
 
-Bus.Publish() is used for publishing messages to the local message bus. Components within your Conduit who
-subscribe to this message will receive it first and then the Conduit will forward the message out over the 
+Publish() is used for publishing messages to the local message bus. Components within your node who
+subscribe to this message will receive it first and then the node will forward the message out over the 
 service bus to distributed subscribers throughout the network.
 
-    [ConduitComponent("http://company.com/Services/AccountService/CustomerProfileComponent")]
     public class CustomerProfileComponent : ConduitComponent, 
         IHandle<BusOpened>,
         IHandle<AnnounceServiceIdentity>,
@@ -112,7 +105,7 @@ service bus to distributed subscribers throughout the network.
         {
             // The service bus has opened, lets send a query out to discover what services
             // and capabilities exist on the distributed network.
-            Bus.Publish<FindAvailableServices>();
+            Publish<FindAvailableServices>();
         }
 
         public void Handle(AnnounceServiceIdentity message)
@@ -137,19 +130,18 @@ service bus to distributed subscribers throughout the network.
             // Publish an event about the customer address changing.
             // This event will traverse the Conduits local message loop and
             // to all the Conduits distributed on the service bus who subscribe to this message.
-            Bus.Publish<CustomerAddressChanged(new CustomerAddressChanged(
+            Publish<CustomerAddressChanged(new CustomerAddressChanged(
                 customer.Street, customer.City, customer.State, customer.Country);
         }
     }
 
-#### Create a Conduit
-    [Conduit("http://company.com/Services/AccountService")]
-    public class AccountConduit : Conduit
+#### Create a Node
+    public class AccountNode : ConduitNode
     {
-        public AccountConduit(IServiceBus bus)
+        public AccountNode(IServiceBus bus)
             : base(bus)
         {
-            // Add all your Components here to be included in the Conduit.
+            // Add all your Components here to be included in the node.
             this.Components.Add(new CustomerProfileComponent());
             this.Components.Add(new OrderComponent());
         }
@@ -158,8 +150,8 @@ service bus to distributed subscribers throughout the network.
 #### Open the Conduit
     // This is an example using Conduit.Bus.MassTransit
     MassTransitBus bus = new MassTransitBus("windsor.xml");
-    AccountConduit conduit = new AccountConduit(bus);
-    conduit.Open();
+    AccountNode node = new AccountNode(bus);
+    node.Open();
 
 This is an example of how to create a simple distributed system using Conduit. The base protocol 
 will evolve to include more functionality to support the needs required from building distributed services.

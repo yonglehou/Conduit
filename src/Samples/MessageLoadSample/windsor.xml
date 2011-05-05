@@ -3,7 +3,7 @@
   <facilities>
     <facility id="masstransit">
       <bus id="main" endpoint="msmq://localhost/mt_main">
-        <subscriptionService endpoint="msmq://localhost/mt_subscriptions" />
+        <subscriptionService endpoint="msmq://desktop-pc/mt_subscriptions" />
         <managementService heartbeatInterval="3" />
       </bus>
 

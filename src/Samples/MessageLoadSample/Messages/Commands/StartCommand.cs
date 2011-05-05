@@ -7,7 +7,6 @@ using Conduit;
 
 namespace MessageLoadSample.Messages.Commands
 {
-    [ConduitMessage("http://Conduit/Samples/MessageLoadTest/ClearCommand")]
     public class StartCommand : Message
     {
         public StartCommand()
@@ -15,11 +14,13 @@ namespace MessageLoadSample.Messages.Commands
 
         }
 
-        public StartCommand(int count)
+        public StartCommand(int count, bool async)
         {
             this.Count = count;
+            this.Async = async;
         }
 
         public int Count { get; set; }
+        public bool Async { get; set; }
     }
 }

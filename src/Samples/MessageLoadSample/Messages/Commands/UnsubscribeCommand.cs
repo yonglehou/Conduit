@@ -7,9 +7,9 @@ using Conduit;
 
 namespace MessageLoadSample.Messages.Commands
 {
-    public class ClearCommand : Message
+    public class UnsubscribeCommand : Message
     {
-        public ClearCommand()
+        public UnsubscribeCommand()
         {
 
         }

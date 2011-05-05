@@ -83,6 +83,15 @@ namespace Conduit.Bus.MassTransit
             }
         }
 
+        public void Unsubscribe<T>() where T : Message
+        {
+            var consumer = container.Resolve<Consumer<T>>();
+            if (consumer != null)
+            {
+                consumer.Stop();
+            }
+        }
+
         public void Publish<T>(T message) where T : Message
         {
             bus.Publish<T>(message);
@@ -90,14 +99,14 @@ namespace Conduit.Bus.MassTransit
 
         internal void Inject(Message message)
         {
-            ThreadPool.QueueUserWorkItem((o) =>
-                {
+            //ThreadPool.QueueUserWorkItem((o) =>
+            //    {
                     MessageReceivedHandler evt = MessageReceived;
                     if (evt != null)
                     {
                         evt(message);
                     }
-                });
+            //    });
         }
     }
 }

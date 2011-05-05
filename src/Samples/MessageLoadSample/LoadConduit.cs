@@ -7,8 +7,7 @@ using Conduit;
 
 namespace MessageLoadSample
 {
-    [Conduit("http://Conduit/Samples/MessageLoadSample")]
-    public class LoadConduit : Conduit.Conduit
+    public class LoadConduit : ConduitNode
     {
         public LoadConduit(IServiceBus bus) 
             : base(bus)

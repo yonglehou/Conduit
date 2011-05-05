@@ -7,7 +7,6 @@ using Conduit;
 
 namespace MessageLoadSample.Messages
 {
-    [ConduitMessage("http://Conduit/Samples/MessageLoadSample/TestMessage")]
     public class TestMessage : Message
     {
         public TestMessage()
