@@ -73,13 +73,22 @@ namespace Conduit.Bus.MassTransit
 
         public void Subscribe<T>() where T : Message
         {
-            container.Register(Component.For<Consumer<T>>().LifeStyle.Transient);            
-            var consumer = container.Resolve<Consumer<T>>();
-
-            if (consumer != null)
+            // TODO: Registering the same type multiple times for multiple components crashes here.
+            // Probably a cleaner way to handle duplicates.
+            try
             {
-                consumer.Bus = this;
-                consumer.Start(bus);
+                container.Register(Component.For<Consumer<T>>().LifeStyle.Transient);
+                var consumer = container.Resolve<Consumer<T>>();
+
+                if (consumer != null)
+                {
+                    consumer.Bus = this;
+                    consumer.Start(bus);
+                }
+            }
+            catch (Exception e)
+            {
+                // TODO: Logging
             }
         }
 

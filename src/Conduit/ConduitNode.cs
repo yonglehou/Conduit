@@ -98,7 +98,7 @@ namespace Conduit
             serviceBus.Open();
 
             // Initialize subscriptions
-            this.Bus.Subscribe(this);
+            Bus.Subscribe(this);
 
             foreach (ConduitComponent component in this.Components)
             {
