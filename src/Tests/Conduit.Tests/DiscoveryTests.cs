@@ -61,20 +61,20 @@ namespace Conduit.Tests
         #endregion
 
         [TestMethod]
-        public void Conduit_And_Component_Registered_With_Capabilities()
+        public void Node_And_Component_Registered_With_Capabilities()
         {
             TestConduit host = new TestConduit();
             host.Open();
 
             Assert.AreEqual<int>(1, host.BusOpenedCount, "Expected 1 BusOpened messages");
             Assert.AreEqual<int>(1, host.AnnounceServiceIdentityCount, "Expected only 1 AnnounceServiceIdentityCount messages");
-            Assert.AreEqual<string>("TestConduit", host.AnnounceServiceIdentity.Name, "Conduit Name should match");
-            Assert.AreEqual<string>("Conduit.Tests.DiscoveryTests+TestConduit", host.AnnounceServiceIdentity.Type, "Conduit Type should match");
+            Assert.AreEqual<string>(typeof(TestConduit).Name, host.AnnounceServiceIdentity.Name, "ConduitNode Name should match");
+            Assert.AreEqual<string>(typeof(TestConduit).FullName, host.AnnounceServiceIdentity.Type, "Conduit Type should match");
             Assert.AreEqual<int>(7, host.AnnounceServiceIdentity.Capabilities.Count(), "Expected 7 capabilities");
             Assert.AreEqual<int>(1, host.AnnounceServiceIdentity.Capabilities.Where(
-                x => x == "Conduit.Tests.TestMessage1").Count(), "Expected TestMessage1 capability");
+                x => x == typeof(TestMessage1).FullName).Count(), "Expected TestMessage1 capability");
             Assert.AreEqual<int>(1, host.AnnounceServiceIdentity.Capabilities.Where(
-                x => x == "Conduit.Tests.TestMessage2").Count(), "Expected TestMessage2 capability");
+                x => x == typeof(TestMessage2).FullName).Count(), "Expected TestMessage2 capability");
         }
 
         class TestConduit : ConduitNode,
@@ -96,10 +96,10 @@ namespace Conduit.Tests
                 this.AnnounceServiceIdentityCount++;
                 this.AnnounceServiceIdentity = message;
             }
+
             public void Handle(BusOpened message)
             {
-                this.BusOpenedCount++;
-                Publish<FindAvailableServices>();
+                this.BusOpenedCount++;                
             }
         }
 
