@@ -119,7 +119,7 @@
             T message = new T();
             if (message != null)
             {
-                Publish<T>(message);
+                Publish<T>(message, local);
             }
             else
             {

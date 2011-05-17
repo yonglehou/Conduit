@@ -108,8 +108,10 @@ namespace Conduit
                 Bus.Subscribe(component);
             }
 
-            Bus.Publish<FindAvailableComponents>(true);
-            Bus.Publish<BusOpened>(true);
+            Publish<FindAvailableComponents>(true);
+            Publish<BusOpened>(true);
+
+            Publish<FindAvailableServices>();
 
             opened = true;
         }
@@ -167,7 +169,7 @@ namespace Conduit
             // Add the capabilities from all the Components in this Conduit.
             mergedCapabilities.AddRange(capabilities);
 
-            Bus.Publish<AnnounceServiceIdentity>(new AnnounceServiceIdentity(
+            Publish<AnnounceServiceIdentity>(new AnnounceServiceIdentity(
                 type.Name,
                 type.FullName,
                 mergedCapabilities

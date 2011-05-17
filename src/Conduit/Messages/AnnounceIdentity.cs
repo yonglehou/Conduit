@@ -7,6 +7,11 @@ namespace Conduit.Messages
 {
     public abstract class AnnounceIdentity : Message
     {
+        public AnnounceIdentity()
+        {
+
+        }
+
         public AnnounceIdentity(string name, string type, IList<string> capabilities)
         {
             this.Name = name;
@@ -17,7 +22,7 @@ namespace Conduit.Messages
         /// <summary>
         /// This is the friendly name of your Component or Service.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Type identifier for the Component or Service within the distributed system.
@@ -25,7 +30,7 @@ namespace Conduit.Messages
         /// <example>
         /// Conduit.Messages.FindAvailableServices
         /// </example>
-        public string Type { get; private set; }
+        public string Type { get; set; }
 
         /// <summary>
         /// List of capabilities this Component or Service supports.
@@ -33,6 +38,6 @@ namespace Conduit.Messages
         /// <example>
         /// Conduit.Messages.FindAvailableServices
         /// </example>
-        public IList<string> Capabilities { get; private set; }
+        public IList<string> Capabilities { get; set; }
     }
 }

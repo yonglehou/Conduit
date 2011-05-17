@@ -7,6 +7,11 @@ namespace Conduit.Messages
 {
     public class AnnounceServiceIdentity : AnnounceIdentity
     {
+        public AnnounceServiceIdentity()
+        {
+
+        }
+
         public AnnounceServiceIdentity(string name, string type, IList<string> capabilities)
             : base(name, type, capabilities)
         {

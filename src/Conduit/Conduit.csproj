@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConcurrentList.cs" />
     <Compile Include="ConduitNode.cs" />
     <Compile Include="ConduitComponent.cs" />
     <Compile Include="ILog.cs" />
