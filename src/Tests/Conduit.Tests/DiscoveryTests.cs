@@ -61,28 +61,46 @@ namespace Conduit.Tests
         #endregion
 
         [TestMethod]
-        public void Node_And_Component_Registered_With_Capabilities()
+        public void Node_And_Component_With_ServiceBus_Registered_With_Capabilities()
         {
-            TestConduit host = new TestConduit();
-            host.Open();
+            FakeServiceBus bus = new FakeServiceBus();
+            TestNode node = new TestNode(bus);
+            node.Open();
 
-            Assert.AreEqual<int>(1, host.BusOpenedCount, "Expected 1 BusOpened messages");
-            Assert.AreEqual<int>(1, host.AnnounceServiceIdentityCount, "Expected only 1 AnnounceServiceIdentityCount messages");
-            Assert.AreEqual<string>(typeof(TestConduit).Name, host.AnnounceServiceIdentity.Name, "ConduitNode Name should match");
-            Assert.AreEqual<string>(typeof(TestConduit).FullName, host.AnnounceServiceIdentity.Type, "Conduit Type should match");
-            Assert.AreEqual<int>(7, host.AnnounceServiceIdentity.Capabilities.Count(), "Expected 7 capabilities");
-            Assert.AreEqual<int>(1, host.AnnounceServiceIdentity.Capabilities.Where(
+            Assert.AreEqual<int>(1, node.BusOpenedCount, "Expected 1 BusOpened messages");
+            Assert.AreEqual<int>(1, node.AnnounceServiceIdentityCount, "Expected only 1 AnnounceServiceIdentityCount messages");
+            Assert.AreEqual<string>(typeof(TestNode).Name, node.AnnounceServiceIdentity.Name, "ConduitNode Name should match");
+            Assert.AreEqual<string>(typeof(TestNode).FullName, node.AnnounceServiceIdentity.Type, "Conduit Type should match");
+            Assert.AreEqual<int>(7, node.AnnounceServiceIdentity.Capabilities.Count(), "Expected 7 capabilities");
+            Assert.AreEqual<int>(1, node.AnnounceServiceIdentity.Capabilities.Where(
                 x => x == typeof(TestMessage1).FullName).Count(), "Expected TestMessage1 capability");
-            Assert.AreEqual<int>(1, host.AnnounceServiceIdentity.Capabilities.Where(
+            Assert.AreEqual<int>(1, node.AnnounceServiceIdentity.Capabilities.Where(
                 x => x == typeof(TestMessage2).FullName).Count(), "Expected TestMessage2 capability");
         }
 
-        class TestConduit : ConduitNode,
+        [TestMethod]
+        public void Node_And_Component_Without_ServiceBus_Registered_With_Capabilities()
+        {
+            TestNode node = new TestNode(null);
+            node.Open();
+
+            Assert.AreEqual<int>(1, node.BusOpenedCount, "Expected 1 BusOpened messages");
+            Assert.AreEqual<int>(1, node.AnnounceServiceIdentityCount, "Expected only 1 AnnounceServiceIdentityCount messages");
+            Assert.AreEqual<string>(typeof(TestNode).Name, node.AnnounceServiceIdentity.Name, "ConduitNode Name should match");
+            Assert.AreEqual<string>(typeof(TestNode).FullName, node.AnnounceServiceIdentity.Type, "Conduit Type should match");
+            Assert.AreEqual<int>(7, node.AnnounceServiceIdentity.Capabilities.Count(), "Expected 7 capabilities");
+            Assert.AreEqual<int>(1, node.AnnounceServiceIdentity.Capabilities.Where(
+                x => x == typeof(TestMessage1).FullName).Count(), "Expected TestMessage1 capability");
+            Assert.AreEqual<int>(1, node.AnnounceServiceIdentity.Capabilities.Where(
+                x => x == typeof(TestMessage2).FullName).Count(), "Expected TestMessage2 capability");
+        }
+
+        class TestNode : ConduitNode,
             IHandle<BusOpened>,
             IHandle<AnnounceServiceIdentity>
         {
-            public TestConduit()
-                : base(new FakeServiceBus())
+            public TestNode(IServiceBus bus)
+                : base(bus)
             {
                 this.Components.Add(new TestComponent());
             }

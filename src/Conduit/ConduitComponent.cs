@@ -15,8 +15,13 @@ namespace Conduit
         private static Type type = null;
 
         public ConduitComponent()
+            : this(Guid.NewGuid())
         {
-            this.Id = Guid.NewGuid();
+        }
+
+        public ConduitComponent(Guid id)
+        {
+            this.Id = id;
         }
 
         public Guid Id { get; private set; }

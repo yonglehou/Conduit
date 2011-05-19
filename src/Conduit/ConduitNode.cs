@@ -95,7 +95,10 @@ namespace Conduit
 
         public void Open()
         {
-            serviceBus.Open();
+            if (serviceBus != null)
+            {
+                serviceBus.Open();
+            }
 
             // Initialize subscriptions
             Bus.Subscribe(this);

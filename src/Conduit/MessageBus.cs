@@ -48,8 +48,12 @@
         public MessageBus(IServiceBus serviceBus, ILog log)
         {
             this.Log = log;
-            this.serviceBus = serviceBus;
-            this.serviceBus.MessageReceived += new MessageReceivedHandler(serviceBus_MessageReceived);
+            
+            if (serviceBus != null)
+            {
+                this.serviceBus = serviceBus;
+                this.serviceBus.MessageReceived += new MessageReceivedHandler(serviceBus_MessageReceived);
+            }
         }
 
         /// <summary>
@@ -67,25 +71,28 @@
                 handlers.Add(new Handler(instance));
 
                 // Subscribe to the service bus.
-                // Get a list of IHandle<T> this object supports.
-                string handleName = typeof(IHandle).Name;
-                Type[] interfaces = instance.GetType().GetInterfaces();
-
-                foreach (Type interfaceType in interfaces)
+                if (serviceBus != null)
                 {
-                    if (interfaceType.IsGenericType)
+                    // Get a list of IHandle<T> this object supports.
+                    string handleName = typeof(IHandle).Name;
+                    Type[] interfaces = instance.GetType().GetInterfaces();
+
+                    foreach (Type interfaceType in interfaces)
                     {
-                        if (interfaceType.Name.StartsWith(handleName))
+                        if (interfaceType.IsGenericType)
                         {
-                            MethodInfo method = serviceBus.GetType().GetMethod("Subscribe");
-                            if (method.IsGenericMethod)
+                            if (interfaceType.Name.StartsWith(handleName))
                             {
-                                // Subscribe for the message type.
-                                Type[] messageTypes = interfaceType.GetGenericArguments();
-                                if (messageTypes.Length > 0)
+                                MethodInfo method = serviceBus.GetType().GetMethod("Subscribe");
+                                if (method.IsGenericMethod)
                                 {
-                                    MethodInfo m = method.MakeGenericMethod(messageTypes[0]);
-                                    m.Invoke(serviceBus, null);
+                                    // Subscribe for the message type.
+                                    Type[] messageTypes = interfaceType.GetGenericArguments();
+                                    if (messageTypes.Length > 0)
+                                    {
+                                        MethodInfo m = method.MakeGenericMethod(messageTypes[0]);
+                                        m.Invoke(serviceBus, null);
+                                    }
                                 }
                             }
                         }
@@ -134,25 +141,28 @@
 
         public void Publish<T>(T message, bool local) where T : Message
         {
-            // Publish to the local EventAggregator loop first.
-            //this.Publish((object)message);
-
-            // Then send over the Service Bus wire.
-            if (serviceBus != null)
+            // If the service bus is null then we might as well treat this
+            // as a local only message.
+            if (serviceBus == null)
             {
-                // If the message is local only, don't send it over the Service Bus wire.
-                if (local)
-                {
-                    // Send only to the local message bus.
-                    if (Log.IsInfoEnabled)
-                    {
-                        Log.Info(string.Format("MSG-SEND: {0}",
-                            message.GetType().Name));
-                    }
+                local = true;
+            }
 
-                    this.Publish((object)message);
+            // If the message is local only, don't send it over the Service Bus wire.
+            if (local)
+            {
+                // Send only to the local message bus.
+                if (Log.IsInfoEnabled)
+                {
+                    Log.Info(string.Format("MSG-SEND: {0}",
+                        message.GetType().Name));
                 }
-                else
+
+                this.Publish((object)message);
+            }
+            else
+            {
+                if (serviceBus != null)
                 {
                     // Send to the service bus.
                     if (Log.IsInfoEnabled)
@@ -163,6 +173,7 @@
 
                     serviceBus.Publish<T>(message);
                 }
+
             }
         }
 
