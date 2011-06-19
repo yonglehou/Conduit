@@ -33,6 +33,9 @@
         /// <param name = "message">The message instance.</param>
         void Publish<T>(T message) where T : Message;
         void Publish<T>(T message, bool local) where T : Message;
+
+        IServiceBus ServiceBus { get; set; }
+        //ILog Log { get; set; }
     }
 
     /// <summary>
@@ -40,19 +43,44 @@
     /// </summary>
     public class MessageBus : IMessageBus
     {
-        //static readonly ILog Log = LogManager.GetLog(typeof(EventAggregator));
         readonly List<Handler> handlers = new List<Handler>();
-        readonly IServiceBus serviceBus = null;
-        protected internal ILog Log { get; protected set; }
+        private ILog log = null;
+
+        private IServiceBus serviceBus = null;
+        public IServiceBus ServiceBus 
+        {
+            get { return serviceBus; }
+            set
+            {
+                if (serviceBus != null)
+                {
+                    this.serviceBus.MessageReceived -= new MessageReceivedHandler(serviceBus_MessageReceived);
+                }
+
+                serviceBus = value;
+                if (serviceBus != null)
+                {
+                    this.serviceBus.MessageReceived += new MessageReceivedHandler(serviceBus_MessageReceived);
+                }
+
+                SubscribeHandlers();
+            }
+        }
 
         public MessageBus(IServiceBus serviceBus, ILog log)
         {
-            this.Log = log;
-            
-            if (serviceBus != null)
+            ServiceBus = serviceBus;
+            this.log = log;
+        }
+
+        public void SubscribeHandlers()
+        {
+            lock (handlers)
             {
-                this.serviceBus = serviceBus;
-                this.serviceBus.MessageReceived += new MessageReceivedHandler(serviceBus_MessageReceived);
+                foreach (Handler instance in handlers)
+                {
+                    SubscribeToServiceBus(instance);
+                }
             }
         }
 
@@ -70,29 +98,34 @@
                 //Log.Info("Subscribing {0}.", instance);
                 handlers.Add(new Handler(instance));
 
-                // Subscribe to the service bus.
-                if (serviceBus != null)
-                {
-                    // Get a list of IHandle<T> this object supports.
-                    string handleName = typeof(IHandle).Name;
-                    Type[] interfaces = instance.GetType().GetInterfaces();
+                SubscribeToServiceBus(instance);
+            }
+        }
 
-                    foreach (Type interfaceType in interfaces)
+        private void SubscribeToServiceBus(object instance)
+        {
+            // Subscribe to the service bus.
+            if (ServiceBus != null)
+            {
+                // Get a list of IHandle<T> this object supports.
+                string handleName = typeof(IHandle).Name;
+                Type[] interfaces = instance.GetType().GetInterfaces();
+
+                foreach (Type interfaceType in interfaces)
+                {
+                    if (interfaceType.IsGenericType)
                     {
-                        if (interfaceType.IsGenericType)
+                        if (interfaceType.Name.StartsWith(handleName))
                         {
-                            if (interfaceType.Name.StartsWith(handleName))
+                            MethodInfo method = ServiceBus.GetType().GetMethod("Subscribe");
+                            if (method.IsGenericMethod)
                             {
-                                MethodInfo method = serviceBus.GetType().GetMethod("Subscribe");
-                                if (method.IsGenericMethod)
+                                // Subscribe for the message type.
+                                Type[] messageTypes = interfaceType.GetGenericArguments();
+                                if (messageTypes.Length > 0)
                                 {
-                                    // Subscribe for the message type.
-                                    Type[] messageTypes = interfaceType.GetGenericArguments();
-                                    if (messageTypes.Length > 0)
-                                    {
-                                        MethodInfo m = method.MakeGenericMethod(messageTypes[0]);
-                                        m.Invoke(serviceBus, null);
-                                    }
+                                    MethodInfo m = method.MakeGenericMethod(messageTypes[0]);
+                                    m.Invoke(ServiceBus, null);
                                 }
                             }
                         }
@@ -143,7 +176,7 @@
         {
             // If the service bus is null then we might as well treat this
             // as a local only message.
-            if (serviceBus == null)
+            if (ServiceBus == null)
             {
                 local = true;
             }
@@ -152,9 +185,9 @@
             if (local)
             {
                 // Send only to the local message bus.
-                if (Log.IsInfoEnabled)
+                if (log.IsInfoEnabled)
                 {
-                    Log.Info(string.Format("MSG-SEND: {0}",
+                    log.Info(string.Format("MSG-SEND: {0}",
                         message.GetType().Name));
                 }
 
@@ -162,16 +195,16 @@
             }
             else
             {
-                if (serviceBus != null)
+                if (ServiceBus != null)
                 {
                     // Send to the service bus.
-                    if (Log.IsInfoEnabled)
+                    if (log.IsInfoEnabled)
                     {
-                        Log.Info(string.Format("BUS-SEND: {0}",
+                        log.Info(string.Format("BUS-SEND: {0}",
                             message.GetType().Name));
                     }
 
-                    serviceBus.Publish<T>(message);
+                    ServiceBus.Publish<T>(message);
                 }
 
             }
@@ -201,11 +234,28 @@
             //});
         }
 
+        internal void SelfPublish(object message, object target)
+        {
+            Handler[] toNotify;
+            lock (handlers)
+                toNotify = handlers.ToArray();
+
+            var messageType = message.GetType();
+            var toNotify2 = toNotify.Where(handler => handler.Matches(target));
+            var dead = toNotify2.Where(handler => !handler.Handle(messageType, message));
+
+            if (dead.Any())
+            {
+                lock (handlers)
+                    dead.Apply(x => handlers.Remove(x));
+            }
+        }
+
         private void serviceBus_MessageReceived(Message message)
         {
-            if (Log.IsInfoEnabled)
+            if (log.IsInfoEnabled)
             {
-                Log.Info(string.Format("BUS-RECV: {0}",
+                log.Info(string.Format("BUS-RECV: {0}",
                     message.GetType().Name));
             }
 

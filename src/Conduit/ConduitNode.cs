@@ -6,154 +6,199 @@ using System.Text;
 
 using Conduit.Messages;
 using Conduit.Messages.Queries;
+using System.Threading;
 
 namespace Conduit
 {
     public class ConduitNode : 
-        IMessageBus,
         IHandle<FindAvailableServices>,
-        IHandle<AnnounceComponentIdentity>
+        IHandle<AnnounceActorIdentity>
     {
+        // Constants
+        private const int DefaultDiscoveryFrequencyMilliseconds = 1000;
+
         private static Type type = null;
 
-        private IServiceBus serviceBus = null;
+        private Timer discoveryTimer;
         private List<string> capabilities = null;
-        private bool opened = false;
+
+        public ConduitNode()
+            : this(null, null, TimeSpan.FromMilliseconds(DefaultDiscoveryFrequencyMilliseconds))
+        {
+        }
 
         public ConduitNode(IServiceBus serviceBus)
-            : this(serviceBus, null, null)
+            : this(serviceBus, null, TimeSpan.FromMilliseconds(DefaultDiscoveryFrequencyMilliseconds))
         {
         }
 
-        public ConduitNode(IServiceBus serviceBus, List<ConduitComponent> components)
+        public ConduitNode(TimeSpan discoveryFrequency)
+            : this(null, null, discoveryFrequency)
         {
-
         }
 
-        public ConduitNode(IServiceBus serviceBus, List<ConduitComponent> components, ILog log)
+        public ConduitNode(IServiceBus serviceBus, ILog log, TimeSpan discoveryFrequency)
         {
-            if (log == null)
+            this.Id = Guid.NewGuid();
+            ServiceLocator.Current.RegisterInstance<ConduitNode>(this.Id.ToString(), this);
+
+            if (log != null)
             {
-                // Setup the default logger.
-                log = new Log();
+                this.Log = log;
             }
-            this.Log = log;
+            else
+            {
+                // Check to make sure the IoC container doesn't
+                // have one already registered.
+                if (this.Log == null)
+                {
+                    // Setup the default logger if the builder wasn't passed one.
+                    this.Log = new Log();
+                }
+            }
 
-            this.Id = Guid.NewGuid();            
-            Log.Info("Starting Conduit: " + this.Id);
+            this.MessageBus = new MessageBus(serviceBus, this.Log);
 
-            this.serviceBus = serviceBus;
+            if (discoveryFrequency != TimeSpan.Zero)
+            {
+                this.DiscoveryFrequency = discoveryFrequency;
+            }
+
             this.capabilities = new List<string>();
-
-            this.Bus = new MessageBus(serviceBus, this.Log);
-
-            if (this.Components == null)
-            {
-                this.Components = new OptimizedObservableCollection<ConduitComponent>();
-                this.Components.CollectionChanged += 
-                    new NotifyCollectionChangedEventHandler(Components_CollectionChanged);
-            }
-
-            if (components != null)
-            {
-                this.Components.AddRange(components);
-            }
         }
 
-        public ILog Log { get; private set; }
+        public static ConduitNodeBuilder Create()
+        {
+            return new ConduitNodeBuilder();
+        }
 
         public Guid Id { get; private set; }
 
-        /// <summary>
-        /// List of Components available in the Conduit service.
-        /// </summary>
-        public OptimizedObservableCollection<ConduitComponent> Components { get; private set; }
-
-        private IMessageBus Bus { get; set; }
-
-        void Components_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private ILog log = null;
+        public ILog Log
         {
-            if (opened)
+            get
             {
-                // Handle when a new component is added to the conduit.
-                if (e.NewItems != null)
+
+                if (this.log != null)
                 {
-                    foreach (var item in e.NewItems)
-                    {
-                        ConduitComponent component = item as ConduitComponent;
-                        if (component != null)
-                        {
-                            component.NodeId = this.Id;
-                            component.Log = Log;
-                            component.Bus = this;
-                            Bus.Subscribe(component);
-                        }
-                    }
+                    return this.log;
+                }
+                else if (ServiceLocator.Current.CanResolve<ILog>())
+                {
+                    this.log = ServiceLocator.Current.Resolve<ILog>();
+                    return this.log;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            internal set
+            {
+                this.log = value;
+                if (value != null)
+                {
+                    ServiceLocator.Current.RegisterInstance<ILog>(value);
+                }
+            }
+        }
+
+        private IMessageBus messageBus = null;
+        public IMessageBus MessageBus
+        {
+            get
+            {
+
+                if (this.messageBus != null)
+                {
+                    return this.messageBus;
+                }
+                else if (ServiceLocator.Current.CanResolve<IMessageBus>(this.Id.ToString()))
+                {
+                    this.messageBus = ServiceLocator.Current.Resolve<IMessageBus>(this.Id.ToString());
+                    return this.messageBus;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            internal set
+            {
+                this.messageBus = value;
+                ServiceLocator.Current.RegisterInstance<IMessageBus>(this.Id.ToString(), value);
+            }
+        }
+
+        private bool opened = false;
+        public bool Opened
+        {
+            get { return opened; }
+            private set { opened = value; }
+        }
+
+        private TimeSpan discoveryFrequency = TimeSpan.FromMilliseconds(DefaultDiscoveryFrequencyMilliseconds);
+        public TimeSpan DiscoveryFrequency
+        {
+            get { return discoveryFrequency; }
+            set
+            {
+                discoveryFrequency = value;
+
+                if (discoveryTimer != null)
+                {
+                    discoveryTimer.Change((long) discoveryFrequency.TotalMilliseconds,
+                                          (long) discoveryFrequency.TotalMilliseconds);
                 }
             }
         }
 
         public void Open()
         {
-            if (serviceBus != null)
+            // Open the ServiceBus.
+            if (this.MessageBus.ServiceBus != null)
             {
-                serviceBus.Open();
+                this.MessageBus.ServiceBus.Open();
             }
 
             // Initialize subscriptions
-            Bus.Subscribe(this);
+            MessageBus.Subscribe(this);
 
-            foreach (ConduitComponent component in this.Components)
-            {
-                component.NodeId = this.Id;
-                component.Bus = this;
-                component.Log = this.Log;
-                Bus.Subscribe(component);
-            }
+            // Discover what actors exist in the process already in memory.
+            MessageBus.Publish<FindAvailableActors>(true);
+            MessageBus.Publish<BusOpened>(true);
 
-            Publish<FindAvailableComponents>(true);
-            Publish<BusOpened>(true);
-
-            Publish<FindAvailableServices>();
+            MessageBus.Publish<FindAvailableServices>();
 
             opened = true;
+
+            discoveryTimer = new Timer(DiscoveryTimerCallback, null, this.DiscoveryFrequency, this.DiscoveryFrequency);
         }
 
-        public void Subscribe(object instance)
+        public void Close()
         {
-            Bus.Subscribe(instance);
+            this.MessageBus.Unsubscribe(this);
+            if (this.MessageBus.ServiceBus != null)
+            {
+                this.MessageBus.ServiceBus.Dispose();
+            }
+
+            ServiceLocator.Current.Remove<ILog>();
+            ServiceLocator.Current.Remove<IMessageBus>(this.Id.ToString());
+            ServiceLocator.Current.Remove<IServiceBus>(this.Id.ToString());
+            ServiceLocator.Current.Remove<ConduitNode>(this.Id.ToString());
+
+            opened = false;
         }
 
-        public void Unsubscribe(object instance)
+        private void DiscoveryTimerCallback(object state)
         {
-            Bus.Unsubscribe(instance);
-        }
-
-        public void Publish<T>() where T : Message, new()
-        {
-            T message = ObjectActivator.New<T>();
-            message.SourceId = this.Id;
-            Bus.Publish<T>(message);
-        }
-
-        public void Publish<T>(bool local) where T : Message, new()
-        {
-            T message = ObjectActivator.New<T>();
-
-            message.SourceId = this.Id;
-            Bus.Publish<T>(message, local);
-        }
-
-        public void Publish<T>(T message) where T : Message
-        {
-            message.SourceId = this.Id;
-            Bus.Publish<T>(message);
-        }
-
-        public void Publish<T>(T message, bool local) where T : Message
-        {
-            message.SourceId = this.Id;
-            Bus.Publish<T>(message, local);
+            Console.WriteLine("TIMER");
+            MessageBus.Publish<FindAvailableActors>(true);
+            MessageBus.Publish<FindAvailableServices>();
         }
 
         #region Message Handling
@@ -172,14 +217,14 @@ namespace Conduit
             // Add the capabilities from all the Components in this Conduit.
             mergedCapabilities.AddRange(capabilities);
 
-            Publish<AnnounceServiceIdentity>(new AnnounceServiceIdentity(
+            MessageBus.Publish<AnnounceServiceIdentity>(new AnnounceServiceIdentity(
                 type.Name,
                 type.FullName,
                 mergedCapabilities
                 ));
         }
 
-        public void Handle(AnnounceComponentIdentity message)
+        public void Handle(AnnounceActorIdentity message)
         {
             foreach (string capability in message.Capabilities)
             {

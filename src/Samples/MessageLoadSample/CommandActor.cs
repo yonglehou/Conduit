@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace MessageLoadSample
 {
-    public class LoadComponent : ConduitComponent,
+    public class CommandActor : Actor,
         IHandle<TestMessage>,
         IHandle<QueryStatus>,
         IHandle<StatusMessage>,

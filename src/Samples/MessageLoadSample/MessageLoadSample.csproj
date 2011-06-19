@@ -44,8 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoadComponent.cs" />
-    <Compile Include="LoadConduit.cs" />
+    <Compile Include="CommandActor.cs" />
     <Compile Include="Messages\Commands\ClearCommand.cs" />
     <Compile Include="Messages\Commands\StartCommand.cs" />
     <Compile Include="Messages\Commands\UnsubscribeCommand.cs" />

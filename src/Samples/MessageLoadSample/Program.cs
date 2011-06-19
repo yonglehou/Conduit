@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Conduit;
 using Conduit.Bus.MassTransit;
 using MessageLoadSample.Messages;
 using MessageLoadSample.Messages.Commands;
@@ -13,14 +14,15 @@ namespace MessageLoadSample
 {
     class Program
     {
-        private static LoadConduit conduit = null;
-
         static void Main(string[] args)
         {
             MassTransitBus bus = new MassTransitBus();
-            conduit = new LoadConduit(bus);
-            conduit.Open();
+            ConduitNode.Create()
+                .WithServiceBus(bus)
+                .Open();
 
+            CommandActor actor = new CommandActor();
+            
             string cmd = string.Empty;
             while (cmd.ToLowerInvariant() != "exit")
             {
@@ -31,13 +33,13 @@ namespace MessageLoadSample
                 switch (cmd)
                 {
                     case "check":
-                        conduit.Publish<QueryConsistency>();
+                        actor.Publish<QueryConsistency>();
                         break;
                     case "clear":
-                        conduit.Publish<ClearCommand>();
+                        actor.Publish<ClearCommand>();
                         break;
                     case "status":
-                        conduit.Publish<QueryStatus>();
+                        actor.Publish<QueryStatus>();
                         break;
                     case "test":
                         int cnt = int.Parse(cmdline[1]);
@@ -46,14 +48,14 @@ namespace MessageLoadSample
                         {
                             async = true;
                         }
-                        conduit.Publish<StartCommand>(new StartCommand(cnt, async));
+                        actor.Publish<StartCommand>(new StartCommand(cnt, async));
                         break;
                     case "ping":
-                        LoadComponent component = conduit.Components[0] as LoadComponent;
-                        component.Ping();
+                        //CommandActor component = conduit.Components[0] as CommandActor;
+                        //component.Ping();
                         break;
                     case "unsubscribe":
-                        conduit.Publish<UnsubscribeCommand>();
+                        actor.Publish<UnsubscribeCommand>();
                         break;
                 }
             }

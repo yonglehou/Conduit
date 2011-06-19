@@ -7,7 +7,7 @@ using Conduit.Messages;
 
 namespace Conduit.Messages.Queries
 {
-    public class FindAvailableComponents : Message
+    public class FindAvailableActors : Message
     {
     }
 }

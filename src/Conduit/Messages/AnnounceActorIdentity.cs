@@ -5,14 +5,14 @@ using System.Text;
 
 namespace Conduit.Messages
 {
-    public class AnnounceComponentIdentity : AnnounceIdentity
+    public class AnnounceActorIdentity : AnnounceIdentity
     {
-        public AnnounceComponentIdentity()
+        public AnnounceActorIdentity()
         {
 
         }
 
-        public AnnounceComponentIdentity(string name, string type, IList<string> capabilities)
+        public AnnounceActorIdentity(string name, string type, IList<string> capabilities)
             : base(name, type, capabilities)
         {
         }

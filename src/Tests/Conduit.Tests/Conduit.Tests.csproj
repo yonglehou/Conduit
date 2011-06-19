@@ -45,8 +45,21 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Two_Nodes_With_One_Actor_One_Opened.cs" />
+    <Compile Include="Two_Nodes_With_One_Actor_Each_Both_Opened.cs" />
+    <Compile Include="Node_By_Ctor_With_Actor_After_Open.cs" />
+    <Compile Include="Node_By_Builder_With_Actor_After_Open.cs" />
+    <Compile Include="Node_By_Ctor_With_Bus_And_Actor.cs" />
+    <Compile Include="Node_By_Builder_With_Bus_And_Actor.cs" />
+    <Compile Include="Node_By_Builder_With_Actor.cs" />
+    <Compile Include="SpecificationContext.cs" />
+    <Compile Include="TestActor2.cs" />
+    <Compile Include="FakeServiceBus.cs" />
+    <Compile Include="Messages\TestMessage1.cs" />
+    <Compile Include="Messages\TestMessage2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DiscoveryTests.cs" />
+    <Compile Include="Node_By_Ctor_With_Actor.cs" />
+    <Compile Include="TestActor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Conduit\Conduit.csproj">
