@@ -1,7 +1,10 @@
 # Conduit
-Conduit is a framework for developing distributed services. The goal of Conduit is to make building 
-decoupled services a breeze by promoting an Event Driven Architecture (EDA) sitting on top of an 
-Enterprise Service Bus (ESB).
+Conduit is an [Actor Model](http://en.wikipedia.org/wiki/Actor_model) based framework for developing distributed services. 
+The goal of Conduit is to make building scalable and fault tolerant services a breeze by promoting an 
+Event Driven Architecture (EDA) sitting on top of an Enterprise Service Bus (ESB).
+
+Conduit is inspired by the work done in the [Akka project](http://akka.io/) which is also an Actor model 
+implementation for Java and Scala.
 
 The design principals behind Conduit are:
 
@@ -15,63 +18,34 @@ The design principals behind Conduit are:
 implementation to sit underneath.
 * An event based protocol layer on top of an Enterprise Service Bus (ESB).
 
-Conduit allows you to write components which participate on a distributed network and provides the
-ability to publish and subscribe messages in the form of commands/queries/events. Since Conduit is 
-an Event Driven Architecture, components communicate through publishing and subscribing to messages.
+Conduit allows you to write actors which have publish and subscribe capabilities for commands/queries/events. Actors can be 
+located in-process or distributed out-of-process and still operate the same. This gives you the flexibility to decouple 
+behaviors and responsibilities as scalability becomes more important.
 
-Conduit abstracts the service bus implementation and currently has 1 implementation on top of MassTransit.
-New service bus implementations are possible. When developing with Conduit you shouldn't need to talk to the
-service bus directly.
-
-Conduit makes publishing and subscribing to messages over the distributed network simple.
-
-Conduit makes your applications and services resilient. Since messages are delivered to queues, if any of your 
-applications or services crash you have not lost any messages. The application or service can restart and
-consume the messages waiting in the queue. Your application requires no change to support this resiliency.
-The service bus utilizes queues and since the service bus is transparent to the Components this resiliency
-is for free.
-
-## Message bus and service bus
-
-* The message bus is a bus internal to a Conduit (application or service). Messages marked as local only will 
-get published within the local message bus and not get publish to the distributed network via the service bus.
-* The service bus is the distributed network. The message bus is connected to the service bus and makes the 
-service bus transparent. By default messages go from the message bus to the service bus and then to the 
-distributed subscribers.
-
-This is how 2 services distributed with Conduit look connected by the service bus.
-
-    Component A <-> |=========|     |===========|     |=============|     |===========|     |=========| <-> Component C
-                    | Msg Bus | <-> | Conduit A | <-> | Service Bus | <-> | Conduit B | <-> | Msg Bus |
-    Component B <-> |=========|     |===========|     |=============|     |===========|	    |=========| <-> Component D
-
-The service bus is transparent. Components only deal with the message bus. The message bus forwards
-messages on to the service bus (unless a message is marked local only).
-
-Conduit has a message protocol on top of the service bus to help with common needs that come from
-building a distributed service architecture. This message protocol supports service discovery and 
-capability discovery. A Component can publish a FindAvailableServices query which will
-propogate the service bus. Every Conduit responds to this message by default allowing for your
-Component to detect what capabilities exist on the network. This is all automatic. By
-creating a Component that subscribes to messages, the Component already understands
-what to send as a response to the query.
+Conduit applications and services are inherently resilient.
 
 ## How to get started
-Building an array of services and components is simple using Conduit. The two key classes are a 
-ConduitNode and a ConduitComponent.
+The two key classes are ConduitNode and Actor.
 
-ConduitNode represents your application or service. You should only have one of these in your process.
-A node can contain many components.
+ConduitNode represents your application or service. Typically you should only have one of these in your process.
+A node can contain many actors.
 
-ConduitComponent makes up the functionality of your application or service. You should have many of these
-and they will likely communicate with each other. You should break up your components based on
+Actors makes up the functionality of your application or service. You should have many of these
+and they will likely communicate with each other. You should break up your actors based on
 responsibility. One of the benefits to EDA is the ability to plug in and out functionality because
-of the loose coupling. Another benefit is if you need to scale out later you can move your components
+of the loose coupling. Another benefit is if you need to scale out later you can move your actors
 into new nodes distributed throughout the network.
+
+Think of an actor like a class that instead of communicating by method calls, communicates by messaging and 
+should encapsulate some functionality and behavior.
 
 #### Create a Message
     public class ChangeCustomerAddress : Message
     {
+        public void ChangeCustomerAddress()
+        {
+        }
+
         public void ChangeCustomerAddress(Guid userId, string street, string city, string state, string country)
         {
             this.UserId = userId;
@@ -81,22 +55,22 @@ into new nodes distributed throughout the network.
             this.Country = country;
         }
 
-        public Guid UserId { get; private set; }
-        public string Street { get; private set; }
-        public string City { get; private set; }
-        public string State { get; private set; }
-        public string Country { get; private set; }
+        public Guid UserId { get; set; }
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
     }
 
-#### Create a Component
-Implementing the IHandle interface is how your component receives messages from the local message bus
-and the service bus.
+#### Create an Actor
+Implementing the IHandle interface is how your actors receive messages. Whether a messages is 
+published or subscribed via other actors in-process or distributed anywhere on the network is transparent.
 
-Publish() is used for publishing messages to the local message bus. Components within your node who
+Publish() is used for publishing messages. Actors within your node who
 subscribe to this message will receive it first and then the node will forward the message out over the 
 service bus to distributed subscribers throughout the network.
 
-    public class CustomerProfileComponent : ConduitComponent, 
+    public class CustomerProfileActor : Actor, 
         IHandle<BusOpened>,
         IHandle<AnnounceServiceIdentity>,
         IHandle<ChangeCustomerAddress>
@@ -116,8 +90,8 @@ service bus to distributed subscribers throughout the network.
 
         public void Handle(ChangeCustomerAddress message)
         {
-            // This message comes from either the local message bus or the service bus.
-            // This is transparent to the Component.
+            // This command message came from another Actor that could be in-process or distributed on the network.
+            // The Actor does not care where the message came from.
 
             // Example of updating the customer details.
             Customer customer = repository.GetById(message.CustomerId);
@@ -128,33 +102,19 @@ service bus to distributed subscribers throughout the network.
             customer.Save();
 
             // Publish an event about the customer address changing.
-            // This event will traverse the Conduits local message loop and
-            // to all the Conduits distributed on the service bus who subscribe to this message.
+            // This event will publish to all subscribers in-process and out-of-process distributed on the network.            
             Publish<CustomerAddressChanged(new CustomerAddressChanged(
                 customer.Street, customer.City, customer.State, customer.Country);
         }
     }
 
-#### Create a Node
-    public class AccountNode : ConduitNode
-    {
-        public AccountNode(IServiceBus bus)
-            : base(bus)
-        {
-            // Add all your Components here to be included in the node.
-            this.Components.Add(new CustomerProfileComponent());
-            this.Components.Add(new OrderComponent());
-        }
-    }
+#### Open the ConduitNode
+    // This is an example using the fluent builder and the Conduit.Bus.MassTransit service bus.
+    ConduitNode node = ConduitNode.Create()
+                           .WithServiceBus(new MassTransitBus("windsor.xml"););
 
-#### Open the Conduit
-    // This is an example using Conduit.Bus.MassTransit
-    MassTransitBus bus = new MassTransitBus("windsor.xml");
-    AccountNode node = new AccountNode(bus);
+    CustomerProfileActor actor = new CustomerProfileActor();
     node.Open();
-
-This is an example of how to create a simple distributed system using Conduit. The base protocol 
-will evolve to include more functionality to support the needs required from building distributed services.
 
 ## Coming soon
 
